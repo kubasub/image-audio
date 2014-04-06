@@ -1,0 +1,36 @@
+1. take picture or upload
+2. convert to audio
+3. play/save audio
+
+
+TESTS:
+Audible frequency range:
+- Google Nexus 4: 100Hz-10kHz
+- Samsung Note 3: 100Hz-15kHz
+
+
+PARAMETERS:
+- loop/no-loop
+- colour amplitude fade (0-0.5)
+- speed (length for which each column is played)
+- pitch shift
+--> x/y grid overlaying image to control two, main params
+
+PROCESSING:
+- per column
+
+MAPPING:
+Frequency (high level):
+- B --> 0-3333Hz
+- G --> 3333Hz-6666Hz
+- R --> 6666Hz-9999Hz
+Amplitude:
+- average of each B, G, R value in a column is mapped to an amplitude
+
+TO DISCUSS:
+Thing #1: I think I may be onto something serious here...
+-- maybe we should assign a diff synth to each r, g and b (ex. red is violin, blue is cello, etc.) and each one can operate in ANY range. That is, we map r from 0-255 from 0-10000Hz as a violin. I think this is a bad idea only because we will have to skip 40Hz instead of the 13Hz for every r value we map. BUT I think it's a dopee idea because think about this:
+---> the larger the red value the lighter colour it will be. Mapping it over, the lighter colors will be higher tones, which matches with what we intuitively expect to hear. If R, G and B are all large (like 255), then we will have white, which will be played as a very high pitch by all instruments.
+THing #2: Amplitudes
+-- When we get the amp of r, g and b, we then could do some ratio to figure out how much of each to play. In other words, we could choose not to just map each to an amp and play it. Ex: Ravg=120, Gavg=120, Bavg=240, then B needs to be 1/2 of the max amp compared to R and G. Note: This could be incorrect, because maybe we want low points where all of the instruments can be quiet..just a thought though.
+
