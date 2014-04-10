@@ -6,9 +6,26 @@ Inputted:
 
 
 for a picture:
+
 	for each column:
+		//generate create audio by adding all frequencies
+
 		for each pixel:
+		//map it to a frequency with an amplitude
+
 			for each sample:
+
+
+
+Classes:
+- Pixel class
+--> vertical offset
+--> horizontal offset
+--> R
+--> G
+--> B
+--> frequency
+--> amplitude
 				
 
 				
