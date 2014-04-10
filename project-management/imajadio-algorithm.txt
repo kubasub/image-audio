@@ -1,0 +1,29 @@
+Imajadio Algorithm
+
+
+Inputted:
+- a picture (height and width)
+
+
+for a picture:
+	for each column:
+		for each pixel:
+			for each sample:
+				
+
+				
+				
+
+Mapping a pixel to a frequency:
+f(x) = x * (h+1)/F, where:
+	   f = frequency of a pixel (Hz)
+	   x = pixel's vertical offset
+	   h = height of image (in pixels)
+	   F = total number of frequencies
+	  
+Mapping a pixel to an amplitude:
+a(x) = [r(x)+g(x)+b(x)]/765 * M/h, where:
+	   a = amplitude of a pixel
+	   x = pixel's vertical offset
+	   h = height of image (in pixels)
+	   M = maximum amplitude or resolution of audio
