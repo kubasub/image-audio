@@ -15,14 +15,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ShareActionProvider;
+import android.widget.Toast;
 
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+
 public class MainActivity extends Activity {
+
+    private ShareActionProvider mShareActionProvider;
 
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
@@ -31,8 +38,10 @@ public class MainActivity extends Activity {
     private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
     private Uri fileUri; // file url to store image
 
+
+
     private ImageView imgPreview;
-    private Button btnCapturePicture;
+    public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
 
 
     @Override
@@ -41,19 +50,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
-        btnCapturePicture = (Button) findViewById(R.id.btnCapturePicture);
-
-        /**
-         * Capture image button click event
-         * */
-        btnCapturePicture.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // capture picture
-                captureImage();
-            }
-        });
+        imgPreview.setImageResource(R.drawable.miley);
 
     }//onCreate
 
@@ -73,8 +70,6 @@ public class MainActivity extends Activity {
             }
         }
     }//onActivityResult
-
-
 
     /**
      * Here we store the file url as it will be null after returning from camera
@@ -105,8 +100,11 @@ public class MainActivity extends Activity {
         
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
         return true;
     }//onCreateOptionsMenu
+
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -116,9 +114,59 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
-        }
+        }else if (id == R.id.action_newImage){
+            //regular button action
+
+           captureImage();
+            deleteLastFromDCIM();
+
+        }else if (id == R.id.action_saveImage){
+            //export image to sdcard
+            imgPreview.setDrawingCacheEnabled(true);
+            Bitmap bitmap = imgPreview.getDrawingCache();
+            saveImageToExternalStorage(bitmap);
+                 }
+
+
         return super.onOptionsItemSelected(item);
+
     }//onOptionsItemSelected
+
+
+    public boolean saveImageToExternalStorage(Bitmap image) {
+        String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD;
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
+                Locale.getDefault()).format(new Date());
+
+        try {
+            File dir = new File(fullPath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            OutputStream fOut = null;
+            File file = new File(fullPath, "IMG_" + timeStamp +".png");
+            file.createNewFile();
+            fOut = new FileOutputStream(file);
+
+// 100 means no compression, the lower you go, the stronger the compression
+            image.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+            fOut.flush();
+            fOut.close();
+
+            MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
+            Toast.makeText(getApplicationContext(), "Saved to Imajadio folder", Toast.LENGTH_SHORT).show();
+            return true;
+
+        } catch (Exception e) {
+            Log.e("saveToExternalStorage()", e.getMessage());
+            return false;
+        }
+    }//saveImageToExternalStorage
+
+
+
+
 
     ////////START CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
 
@@ -126,8 +174,7 @@ public class MainActivity extends Activity {
      * Checking device has camera hardware or not
      * */
     private boolean isDeviceSupportCamera() {
-        if (getApplicationContext().getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_CAMERA)) {
+        if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             // this device has a camera
             return true;
         } else {
@@ -163,16 +210,10 @@ public class MainActivity extends Activity {
             // bitmap factory
             BitmapFactory.Options options = new BitmapFactory.Options();
 
-            // downsizing image as it throws OutOfMemory Exception for larger
-            // images
-         //   options.inSampleSize = 8;
-
-            final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(),
+                       final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(),
                     options);
 
-                  imgPreview.setImageBitmap(bitmap);
-
-
+                 imgPreview.setImageBitmap(bitmap);
 
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -220,4 +261,28 @@ public class MainActivity extends Activity {
     }//getOutputMediaFile
     ////////END CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
 
-}
+
+    private boolean deleteLastFromDCIM() {
+
+        boolean success = false;
+        try {
+            File[] images = new File(Environment.getExternalStorageDirectory()
+                    + File.separator + "DCIM/Camera").listFiles();
+            File latestSavedImage = images[0];
+            for (int i = 1; i < images.length; ++i) {
+                if (images[i].lastModified() > latestSavedImage.lastModified()) {
+                    latestSavedImage = images[i];
+                }
+            }
+
+            // OR just use success = latestSavedImage.delete();
+            success = new File(Environment.getExternalStorageDirectory()
+                    + File.separator + "DCIM/Camera/"
+                    + latestSavedImage).delete();
+            return success;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return success;
+        }
+    }
+}//deleteLastFromDCIM

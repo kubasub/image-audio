@@ -1,46 +1,127 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal"
-    android:baselineAligned="false"
-    tools:context=".MainActivity" >
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true">
 
-
-         <!-- Capture picture button -->
-        <Button
-            android:id="@+id/btnCapturePicture"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Take a Picture"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
-
-
-
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Preview"
-            android:padding="10dp"
-            android:textSize="15dp"
-            android:layout_below="@+id/btnCapturePicture"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:gravity="center" />
-
-
-        <!-- To display picture taken -->
 
     <ImageView
-            android:id="@+id/imgPreview"
-            android:layout_width="310dp"
-            android:layout_height="310dp"
-            android:visibility="visible"
+        android:id="@+id/imgPreview"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:visibility="visible"
         android:layout_gravity="center_vertical|right"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:scaleType="centerCrop"
+        />
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PLAY"
+                android:id="@+id/button"
+                android:layout_centerHorizontal="true"
+
+                android:visibility="visible" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PLAY"
+
+                android:id="@+id/playButton"
+                android:layout_centerHorizontal="true"
+                />
+
+
+            <ToggleButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/ic_action_repeat"
+                android:textOn="On"
+                android:textOff="Off"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"/>
 
 
 
-</RelativeLayout>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Param1"
+                android:gravity="center_vertical"
+                android:id="@+id/Param1Text" />
+
+
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/seekBar"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:progressDrawable="@drawable/styled_progress"
+                android:indeterminate="false" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Param2"
+                android:gravity="center_vertical"
+                android:id="@+id/Param2Text"
+                />
+
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/seekBar2"
+                android:layout_above="@+id/seekBar"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:gravity="center_vertical"
+                android:progressDrawable="@drawable/styled_progress"
+                android:indeterminate="false"
+
+
+
+           />
+
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>
