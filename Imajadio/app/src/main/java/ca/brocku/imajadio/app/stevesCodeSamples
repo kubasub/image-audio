@@ -1,0 +1,13 @@
+       // btnCapturePicture = (Button) findViewById(R.id.btnCapturePicture);
+
+        /**
+         * Capture image button click event
+         * */
+     //   btnCapturePicture.setOnClickListener(new View.OnClickListener() {
+
+     //       @Override
+     //       public void onClick(View v) {
+                // capture picture
+      //          captureImage();
+     //       }
+     //   });

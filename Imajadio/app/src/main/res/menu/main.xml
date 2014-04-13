@@ -3,7 +3,32 @@
     tools:context="ca.brocku.imajadio.app.MainActivity" >
     
     <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+    android:title="@string/action_settings"
+    android:orderInCategory="100"
+    android:showAsAction="never" />
+
+    <item android:id="@+id/action_exportAudio"
+        android:title="@string/exportAudio"
         android:orderInCategory="100"
         android:showAsAction="never" />
+
+    <item android:id="@+id/action_saveImage"
+        android:title="@string/saveImage"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+       />
+
+    <item android:id="@+id/action_loadImage"
+        android:title="@string/loadImage"
+        android:icon="@drawable/ic_action_upload"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_newImage"
+        android:title="@string/newImage"
+        android:icon="@drawable/ic_action_camera"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
+
+
 </menu>
