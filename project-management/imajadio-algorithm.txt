@@ -1,10 +1,6 @@
 Imajadio Algorithm
 
 
-Inputted:
-- a picture (height and width)
-
-
 for a picture:
 
 	for each column:
@@ -14,25 +10,17 @@ for a picture:
 		//map it to a frequency with an amplitude
 
 			for each sample:
-
-
-
-Classes:
-- Pixel class
---> vertical offset
---> horizontal offset
---> R
---> G
---> B
---> frequency
---> amplitude
 				
 
-				
-				
+OPTIMIZATIONS TO MAKE:
+- Frequency calculation is the same for every column. Only determine frequency set once.
+--> when calculating each set, just determine increment, and add increment to get all frequencies instead of doing whole calculation for each successive pixel.
+
+
+
 
 Mapping a pixel to a frequency:
-f(x) = x * (h+1)/F, where:
+f(x) = x * F/h, where:
 	   f = frequency of a pixel (Hz)
 	   x = pixel's vertical offset
 	   h = height of image (in pixels)

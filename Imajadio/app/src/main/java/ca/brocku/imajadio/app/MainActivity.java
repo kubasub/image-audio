@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioTrack;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +23,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import imajadio.Imajadio;
 
 public class MainActivity extends Activity {
 
@@ -55,7 +59,22 @@ public class MainActivity extends Activity {
             }
         });
 
-    }//onCreate
+
+        //TODO: Move IMAJADIO WORK to correct location
+        //Start IMAJADIO WORK
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inDensity = metrics.densityDpi;
+
+        Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.decreasing_freq, options);
+        Imajadio imajadio = new Imajadio(test, 16, 0.1);
+        Log.e("IMAGE DIMENS (H/W)", test.getHeight() + "; " + test.getWidth());
+        AudioTrack track = imajadio.bitmapToAudio();
+        Log.e("PLAYING", "TRACK");
+        track.play();
+        //End IMAJADIO WORK
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
