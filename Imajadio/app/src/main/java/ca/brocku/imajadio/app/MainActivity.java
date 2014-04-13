@@ -35,9 +35,8 @@ public class MainActivity extends Activity {
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     public static final int MEDIA_TYPE_IMAGE = 1;
     // directory name to store captured images
-    private static final String IMAGE_DIRECTORY_NAME = "Hello Camera";
+    private static final String IMAGE_DIRECTORY_NAME = "HelloCamera";
     private Uri fileUri; // file url to store image
-
 
 
     private ImageView imgPreview;
@@ -97,13 +96,12 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
         return true;
     }//onCreateOptionsMenu
-
 
 
     @Override
@@ -114,19 +112,19 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
-        }else if (id == R.id.action_newImage){
-            //regular button action
+        } else if (id == R.id.action_newImage) {
 
-           captureImage();
+            //regular button action
+            captureImage();
             deleteLastFromDCIM();
 
-        }else if (id == R.id.action_saveImage){
+        } else if (id == R.id.action_saveImage) {
             //export image to sdcard
             imgPreview.setDrawingCacheEnabled(true);
             Bitmap bitmap = imgPreview.getDrawingCache();
             saveImageToExternalStorage(bitmap);
-                 }
-
+            deleteLastFromDCIM();
+        }
 
         return super.onOptionsItemSelected(item);
 
@@ -135,8 +133,7 @@ public class MainActivity extends Activity {
 
     public boolean saveImageToExternalStorage(Bitmap image) {
         String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD;
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
-                Locale.getDefault()).format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
 
         try {
             File dir = new File(fullPath);
@@ -145,7 +142,7 @@ public class MainActivity extends Activity {
             }
 
             OutputStream fOut = null;
-            File file = new File(fullPath, "IMG_" + timeStamp +".png");
+            File file = new File(fullPath, "IMG_" + timeStamp + ".png");
             file.createNewFile();
             fOut = new FileOutputStream(file);
 
@@ -153,6 +150,10 @@ public class MainActivity extends Activity {
             image.compress(Bitmap.CompressFormat.PNG, 100, fOut);
             fOut.flush();
             fOut.close();
+
+            //This is important. It is used to let the scanner know a new file was added.
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+
 
             MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), file.getAbsolutePath(), file.getName(), file.getName());
             Toast.makeText(getApplicationContext(), "Saved to Imajadio folder", Toast.LENGTH_SHORT).show();
@@ -165,14 +166,11 @@ public class MainActivity extends Activity {
     }//saveImageToExternalStorage
 
 
-
-
-
     ////////START CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
 
     /**
      * Checking device has camera hardware or not
-     * */
+     */
     private boolean isDeviceSupportCamera() {
         if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             // this device has a camera
@@ -182,9 +180,10 @@ public class MainActivity extends Activity {
             return false;
         }
     }//isDeviceSupportCamera
- /*
- * Capturing Camera Image will launch camera app request image capture
- */
+
+    /*
+    * Capturing Camera Image will launch camera app request image capture
+    */
     private void captureImage() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -198,7 +197,7 @@ public class MainActivity extends Activity {
 
     /**
      * Receiving activity result method will be called after closing the camera
-     * */
+     */
 
      /*
      * Display image from a path to ImageView
@@ -210,10 +209,17 @@ public class MainActivity extends Activity {
             // bitmap factory
             BitmapFactory.Options options = new BitmapFactory.Options();
 
-                       final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(),
+            final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(),
                     options);
 
-                 imgPreview.setImageBitmap(bitmap);
+            imgPreview.setImageBitmap(bitmap);
+
+
+//deletes the file after it has been displayed
+            //this is the uncropped image getting deleted
+            File file = new File(fileUri.getPath());
+            boolean deleted = file.delete();
+
 
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -257,12 +263,13 @@ public class MainActivity extends Activity {
             return null;
         }
 
+
         return mediaFile;
     }//getOutputMediaFile
     ////////END CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
 
 
-    private boolean deleteLastFromDCIM() {
+    private static boolean deleteLastFromDCIM() {
 
         boolean success = false;
         try {
@@ -274,7 +281,6 @@ public class MainActivity extends Activity {
                     latestSavedImage = images[i];
                 }
             }
-
             // OR just use success = latestSavedImage.delete();
             success = new File(Environment.getExternalStorageDirectory()
                     + File.separator + "DCIM/Camera/"
@@ -284,5 +290,5 @@ public class MainActivity extends Activity {
             e.printStackTrace();
             return success;
         }
-    }
-}//deleteLastFromDCIM
+    }//deleteLastFromDCIM
+}//MainActivity
