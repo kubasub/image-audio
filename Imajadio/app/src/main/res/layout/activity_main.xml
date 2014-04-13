@@ -3,13 +3,15 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_alignParentLeft="true"
-    android:layout_alignParentStart="true">
+    android:layout_alignParentStart="true"
+    >
 
 
     <ImageView
         android:id="@+id/imgPreview"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:visibility="visible"
         android:layout_gravity="center_vertical|right"
         android:layout_alignParentTop="true"
@@ -24,7 +26,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="wrap_content">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -36,7 +38,6 @@
                 android:text="PLAY"
                 android:id="@+id/button"
                 android:layout_centerHorizontal="true"
-
                 android:visibility="visible" />
 
             <Button
