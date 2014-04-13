@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
@@ -63,7 +62,7 @@ public class MainActivity extends Activity {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = metrics.densityDpi;
 
-        Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.decreasing_freq, options);
+        Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.white_test, options);
         Imajadio imajadio = new Imajadio(test, 16, 0.1);
         Log.e("IMAGE DIMENS (H/W)", test.getHeight() + "; " + test.getWidth());
         AudioTrack track = imajadio.bitmapToAudio();

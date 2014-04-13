@@ -126,8 +126,8 @@ public class Imajadio {
      * @return Harmonic         the harmonic representation of the pixel
      */
     private Harmonic pixelToHarmonic(int pixel, int verticalOffset) {
-        double frequency = (double)verticalOffset *
-                NUMBER_OF_FREQUENCIES/IMAGE_HEIGHT;
+        double frequency = (double)(IMAGE_HEIGHT-verticalOffset) *
+                NUMBER_OF_FREQUENCIES/(IMAGE_HEIGHT+1);
 
         double amplitude = ((double)(Color.red(pixel)+Color.green(pixel)+Color.blue(pixel)))/765 *
                 MAX_AMPLITUDE/IMAGE_HEIGHT;
