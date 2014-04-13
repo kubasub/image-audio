@@ -18,6 +18,12 @@
         android:showAsAction="never"
        />
 
+    <item android:id="@+id/action_loadImage"
+        android:title="@string/loadImage"
+        android:icon="@drawable/ic_action_upload"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
+
     <item android:id="@+id/action_newImage"
         android:title="@string/newImage"
         android:icon="@drawable/ic_action_camera"

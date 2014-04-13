@@ -10,6 +10,6 @@
     <string name="exportAudio">Export Audio</string>
     <string name="saveImage">Save Image</string>
     <string name="newImage">New Image</string>
-
+    <string name="loadImage">Load Image</string>
 
 </resources>

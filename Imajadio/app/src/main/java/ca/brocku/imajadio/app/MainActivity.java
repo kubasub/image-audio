@@ -3,6 +3,7 @@ package ca.brocku.imajadio.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -34,6 +35,7 @@ public class MainActivity extends Activity {
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     public static final int MEDIA_TYPE_IMAGE = 1;
+    private static int RESULT_LOAD_IMAGE = 2;
     // directory name to store captured images
     private static final String IMAGE_DIRECTORY_NAME = "HelloCamera";
     private Uri fileUri; // file url to store image
@@ -62,11 +64,33 @@ public class MainActivity extends Activity {
                 // display it in image view
                 previewCapturedImage();
 
+                //deletes the file after it has been displayed
+                //this is the uncropped image getting deleted
+                File file = new File(fileUri.getPath());
+                boolean deleted = file.delete();
+
+
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
             } else {
                 // failed to capture image
             }
+        } else if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && null != data) {
+            //This is to LOAD IMAGE FROM SDCARD
+            Uri selectedImage = data.getData();
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+            Cursor cursor = getContentResolver().query(selectedImage,
+                    filePathColumn, null, null, null);
+            cursor.moveToFirst();
+
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String picturePath = cursor.getString(columnIndex);
+            cursor.close();
+
+            // String picturePath contains the path of selected Image
+
+            imgPreview.setImageBitmap(BitmapFactory.decodeFile(picturePath));
         }
     }//onActivityResult
 
@@ -118,10 +142,19 @@ public class MainActivity extends Activity {
             captureImage();
             deleteLastFromDCIM();
 
+        } else if (id == R.id.action_loadImage) {
+            //load image from sdcard
+            Intent i = new Intent(
+                    Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+            startActivityForResult(i, RESULT_LOAD_IMAGE);
+
         } else if (id == R.id.action_saveImage) {
             //export image to sdcard
+            imgPreview.setDrawingCacheEnabled(false);
             imgPreview.setDrawingCacheEnabled(true);
             Bitmap bitmap = imgPreview.getDrawingCache();
+
             saveImageToExternalStorage(bitmap);
             deleteLastFromDCIM();
         }
@@ -146,7 +179,7 @@ public class MainActivity extends Activity {
             file.createNewFile();
             fOut = new FileOutputStream(file);
 
-// 100 means no compression, the lower you go, the stronger the compression
+            // 100 means no compression, the lower you go, the stronger the compression
             image.compress(Bitmap.CompressFormat.PNG, 100, fOut);
             fOut.flush();
             fOut.close();
@@ -213,12 +246,6 @@ public class MainActivity extends Activity {
                     options);
 
             imgPreview.setImageBitmap(bitmap);
-
-
-//deletes the file after it has been displayed
-            //this is the uncropped image getting deleted
-            File file = new File(fileUri.getPath());
-            boolean deleted = file.delete();
 
 
         } catch (NullPointerException e) {
