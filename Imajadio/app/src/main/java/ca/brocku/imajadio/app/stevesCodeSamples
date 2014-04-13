@@ -11,3 +11,38 @@
       //          captureImage();
      //       }
      //   });
+
+
+         public boolean onOptionsItemSelected(MenuItem item) {
+             // Handle action bar item clicks here. The action bar will
+             // automatically handle clicks on the Home/Up button, so long
+             // as you specify a parent activity in AndroidManifest.xml.
+             int id = item.getItemId();
+             if (id == R.id.action_settings) {
+                 return true;
+             } else if (id == R.id.action_newImage) {
+
+                 //regular button action
+                 captureImage();
+                 deleteLastFromDCIM();
+
+             } else if (id == R.id.action_loadImage) {
+                 //load image from sdcard
+                 Intent i = new Intent(
+                         Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+                 startActivityForResult(i, RESULT_LOAD_IMAGE);
+
+             } else if (id == R.id.action_saveImage) {
+                 //export image to sdcard
+                 imgPreview.setDrawingCacheEnabled(false);
+                 imgPreview.setDrawingCacheEnabled(true);
+                 Bitmap bitmap = imgPreview.getDrawingCache();
+
+                 saveImageToExternalStorage(bitmap);
+                 deleteLastFromDCIM();
+             }
+
+             return super.onOptionsItemSelected(item);
+
+         }//onOptionsItemSelected

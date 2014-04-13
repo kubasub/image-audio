@@ -151,29 +151,42 @@ public class MainActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.action_newImage) {
 
-            //regular button action
-            captureImage();
-            deleteLastFromDCIM();
+        switch (id) {
 
-        } else if (id == R.id.action_loadImage) {
-            //load image from sdcard
-            Intent i = new Intent(
-                    Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            case R.id.action_settings:
+                return true;
 
-            startActivityForResult(i, RESULT_LOAD_IMAGE);
+            case R.id.action_exportAudio:
+                return true;
 
-        } else if (id == R.id.action_saveImage) {
-            //export image to sdcard
-            imgPreview.setDrawingCacheEnabled(false);
-            imgPreview.setDrawingCacheEnabled(true);
-            Bitmap bitmap = imgPreview.getDrawingCache();
+            case R.id.action_newImage:
+                captureImage();
+                deleteLastFromDCIM();
+                return true;
 
-            saveImageToExternalStorage(bitmap);
-            deleteLastFromDCIM();
+            case R.id.action_loadImage:
+                //load image from sdcard
+                Intent i = new Intent(
+                        Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, RESULT_LOAD_IMAGE);
+                return true;
+
+            case R.id.action_saveImage:
+                //export image to sdcard
+                imgPreview.setDrawingCacheEnabled(false);
+                imgPreview.setDrawingCacheEnabled(true);
+                Bitmap bitmap = imgPreview.getDrawingCache();
+                saveImageToExternalStorage(bitmap);
+                deleteLastFromDCIM();
+                return true;
+            case R.id.action_exit:
+                Intent intent = new Intent(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                return true;
+
         }
 
         return super.onOptionsItemSelected(item);

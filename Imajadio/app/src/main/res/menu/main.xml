@@ -30,5 +30,11 @@
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
 
+    <item android:id="@+id/action_exit"
+        android:title="Close"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        />
+
 
 </menu>
