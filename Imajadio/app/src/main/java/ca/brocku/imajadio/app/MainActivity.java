@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     private static int RESULT_LOAD_IMAGE = 2;
     // directory name to store captured images
-    private static final String IMAGE_DIRECTORY_NAME = "HelloCamera";
+    private static final String IMAGE_DIRECTORY_NAME = "Imajadio";
     private Uri fileUri; // file url to store image
 
 
@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = metrics.densityDpi;
 
-        Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.white_test, options);
+        Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.hz4950, options);
         Imajadio imajadio = new Imajadio(test, 16, 0.1);
         Log.e("IMAGE DIMENS (H/W)", test.getHeight() + "; " + test.getWidth());
         AudioTrack track = imajadio.bitmapToAudio();
