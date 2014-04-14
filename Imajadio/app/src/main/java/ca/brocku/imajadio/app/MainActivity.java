@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
@@ -24,6 +25,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
 
@@ -43,6 +46,7 @@ public class MainActivity extends Activity {
 
 
     private ImageView imgPreview;
+    private Button playButton;
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
 
 
@@ -55,21 +59,36 @@ public class MainActivity extends Activity {
         imgPreview.setImageResource(R.drawable.miley);
 
 
-        //TODO: Move IMAJADIO WORK to correct location
-        //Start IMAJADIO WORK
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        playButton = (Button) findViewById(R.id.playButton);
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inDensity = metrics.densityDpi;
+           playButton.setOnClickListener(new View.OnClickListener() {
 
-        Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.hz4950, options);
-        Imajadio imajadio = new Imajadio(test, 16, 0.1);
-        Log.e("IMAGE DIMENS (H/W)", test.getHeight() + "; " + test.getWidth());
-        AudioTrack track = imajadio.bitmapToAudio();
-        Log.e("PLAYING", "TRACK");
-        track.play();
-        //End IMAJADIO WORK
+               @Override
+               public void onClick(View v) {
+                   //TODO: Move IMAJADIO WORK to correct location
+                   //Start IMAJADIO WORK
+                   DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+                   BitmapFactory.Options options = new BitmapFactory.Options();
+                   options.inDensity = metrics.densityDpi;
+
+                   //i took out a this. on get resources ...
+                   Bitmap test = BitmapFactory.decodeResource(getResources(), R.drawable.dual_tone, options);
+                   Imajadio imajadio = new Imajadio(test, 16, 0.1);
+                   Log.e("IMAGE DIMENS (H/W)", test.getHeight() + "; " + test.getWidth());
+                   AudioTrack track = imajadio.bitmapToAudio();
+                   Log.e("PLAYING", "TRACK");
+                   track.play();
+                   //End IMAJADIO WORK
+
+              }
+          });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }//onResume
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -161,13 +180,12 @@ public class MainActivity extends Activity {
 
             case R.id.action_newImage:
                 captureImage();
-                deleteLastFromDCIM();
                 return true;
 
             case R.id.action_loadImage:
                 //load image from sdcard
                 Intent i = new Intent(
-                        Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_IMAGE);
                 return true;
 
@@ -178,6 +196,7 @@ public class MainActivity extends Activity {
                 Bitmap bitmap = imgPreview.getDrawingCache();
                 saveImageToExternalStorage(bitmap);
                 deleteLastFromDCIM();
+
                 return true;
             case R.id.action_exit:
                 Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -325,26 +344,33 @@ public class MainActivity extends Activity {
     ////////END CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
 
 
-    private static boolean deleteLastFromDCIM() {
+    private void deleteLastFromDCIM() {
+        // TODO Auto-generated method stub
+        File f = new File(Environment.getExternalStorageDirectory() + "/DCIM/Camera" );
 
-        boolean success = false;
-        try {
-            File[] images = new File(Environment.getExternalStorageDirectory()
-                    + File.separator + "DCIM/Camera").listFiles();
-            File latestSavedImage = images[0];
-            for (int i = 1; i < images.length; ++i) {
-                if (images[i].lastModified() > latestSavedImage.lastModified()) {
-                    latestSavedImage = images[i];
+        Log.i("Log", "file name in delete folder :  "+f.toString());
+        File [] files = f.listFiles();
+
+        //Log.i("Log", "List of files is: " +files.toString());
+        Arrays.sort(files, new Comparator<Object>() {
+            public int compare(Object o1, Object o2) {
+
+                if (((File) o1).lastModified() > ((File) o2).lastModified()) {
+                    //         Log.i("Log", "Going -1");
+                    return -1;
+                } else if (((File) o1).lastModified() < ((File) o2).lastModified()) {
+                    //     Log.i("Log", "Going +1");
+                    return 1;
+                } else {
+                    //     Log.i("Log", "Going 0");
+                    return 0;
                 }
             }
-            // OR just use success = latestSavedImage.delete();
-            success = new File(Environment.getExternalStorageDirectory()
-                    + File.separator + "DCIM/Camera/"
-                    + latestSavedImage).delete();
-            return success;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return success;
-        }
+        });
+
+        //Log.i("Log", "Count of the FILES AFTER DELETING ::"+files[0].length());
+        files[0].delete();
+
     }//deleteLastFromDCIM
+
 }
