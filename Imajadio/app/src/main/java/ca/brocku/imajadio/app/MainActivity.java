@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
 
@@ -56,14 +58,20 @@ public class MainActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
-        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.linear_decreasing_freq, options);
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.pitches, options);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
         imgPreview.setImageBitmap(image);
 
         playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new PlayButtonHandler());
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }//onResume
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -158,13 +166,12 @@ public class MainActivity extends Activity {
 
             case R.id.action_newImage:
                 captureImage();
-                deleteLastFromDCIM();
                 return true;
 
             case R.id.action_loadImage:
                 //load image from sdcard
                 Intent i = new Intent(
-                        Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_IMAGE);
                 return true;
 
@@ -175,6 +182,7 @@ public class MainActivity extends Activity {
                 Bitmap bitmap = imgPreview.getDrawingCache();
                 saveImageToExternalStorage(bitmap);
                 deleteLastFromDCIM();
+
                 return true;
             case R.id.action_exit:
                 Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -322,28 +330,35 @@ public class MainActivity extends Activity {
     ////////END CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
 
 
-    private static boolean deleteLastFromDCIM() {
+    private void deleteLastFromDCIM() {
+        // TODO Auto-generated method stub
+        File f = new File(Environment.getExternalStorageDirectory() + "/DCIM/Camera" );
 
-        boolean success = false;
-        try {
-            File[] images = new File(Environment.getExternalStorageDirectory()
-                    + File.separator + "DCIM/Camera").listFiles();
-            File latestSavedImage = images[0];
-            for (int i = 1; i < images.length; ++i) {
-                if (images[i].lastModified() > latestSavedImage.lastModified()) {
-                    latestSavedImage = images[i];
+        Log.i("Log", "file name in delete folder :  "+f.toString());
+        File [] files = f.listFiles();
+
+        //Log.i("Log", "List of files is: " +files.toString());
+        Arrays.sort(files, new Comparator<Object>() {
+            public int compare(Object o1, Object o2) {
+
+                if (((File) o1).lastModified() > ((File) o2).lastModified()) {
+                    //         Log.i("Log", "Going -1");
+                    return -1;
+                } else if (((File) o1).lastModified() < ((File) o2).lastModified()) {
+                    //     Log.i("Log", "Going +1");
+                    return 1;
+                } else {
+                    //     Log.i("Log", "Going 0");
+                    return 0;
                 }
             }
-            // OR just use success = latestSavedImage.delete();
-            success = new File(Environment.getExternalStorageDirectory()
-                    + File.separator + "DCIM/Camera/"
-                    + latestSavedImage).delete();
-            return success;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return success;
-        }
+        });
+
+        //Log.i("Log", "Count of the FILES AFTER DELETING ::"+files[0].length());
+        files[0].delete();
+
     }//deleteLastFromDCIM
+
 
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
