@@ -39,7 +39,7 @@ public class Imajadio {
 
         this.grainDuration = grainDuration;
     }
-
+ 
     public double getGrainDuration() {
         return grainDuration;
     }
