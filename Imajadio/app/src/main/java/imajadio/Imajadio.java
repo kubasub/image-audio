@@ -39,7 +39,7 @@ public class Imajadio {
 
         this.grainDuration = grainDuration;
     }
- 
+
     public double getGrainDuration() {
         return grainDuration;
     }
@@ -70,7 +70,7 @@ public class Imajadio {
             int[] pixels = new int[IMAGE_HEIGHT];
             IMAGE.getPixels(pixels, 0, 1, column-1, 0, 1, IMAGE_HEIGHT); //extract a column of pixels
             Log.e("COLUMN #", String.valueOf(column));
-            samples = columnToSamples(pixels);
+            samples = columnToSamples(pixels, column-1);
 
             // convert to 16 bit pcm sound array
             // assumes the sample buffer is normalised.
@@ -87,7 +87,7 @@ public class Imajadio {
         return audioTrack;
     }
 
-    private double[] columnToSamples(int[] column) {
+    private double[] columnToSamples(int[] column, int columnIndex) {
         Harmonic[] harmonics = new Harmonic[column.length];
 
         for(int verticalOffset=0; verticalOffset<column.length; verticalOffset++) {
@@ -106,7 +106,15 @@ public class Imajadio {
             double amplitude = 0;
 
             for(Harmonic h: harmonics) { //add the amplitude of each harmonic
-                amplitude+= h.getAmplitude() * Math.sin(w * h.getFrequency() * sampleIndex);
+
+                //equations which produce a stutter between columns
+                //amplitude+= h.getAmplitude() * Math.sin(w * h.getFrequency() * sampleIndex);
+                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex / (SAMPLE_RATE/h.getFrequency()));
+
+                //equations which do not produce a stutter between columns
+                // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
+                amplitude+= h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples*columnIndex)+sampleIndex));
+                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
             }
 
             samples[sampleIndex] = (int)Math.floor(amplitude+0.5); //rounds amplitude to an integer

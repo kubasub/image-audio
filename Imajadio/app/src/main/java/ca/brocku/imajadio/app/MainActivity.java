@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
-        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.pitches, options);
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.linear_decreasing_freq, options);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
         imgPreview.setImageBitmap(image);
