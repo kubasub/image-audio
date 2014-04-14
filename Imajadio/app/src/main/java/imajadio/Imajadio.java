@@ -13,7 +13,7 @@ import android.util.Log;
  */
 public class Imajadio {
     private final int NUMBER_OF_FREQUENCIES = 10000-100; //frequency range from 100-10000 Hz
-    private final int SAMPLE_RATE = 44100;
+    private final int SAMPLE_RATE = 8000;
 
     private final Bitmap IMAGE;
     private final int IMAGE_HEIGHT;
@@ -99,6 +99,9 @@ public class Imajadio {
         double[] samples = new double[numSamples];
 
         double w = 2*Math.PI/numSamples;
+
+
+
         for(int sampleIndex=0; sampleIndex<numSamples; sampleIndex++) { //for each sample in the output table
             double amplitude = 0;
 

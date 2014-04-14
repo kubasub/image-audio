@@ -11,11 +11,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
@@ -41,9 +41,12 @@ public class MainActivity extends Activity {
     private static final String IMAGE_DIRECTORY_NAME = "Imajadio";
     private Uri fileUri; // file url to store image
 
-
     private ImageView imgPreview;
+    private Button playButton;
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
+
+    private Bitmap image; //the image to be converted
+    private AudioTrack audio; //contains the audio to play
 
 
     @Override
@@ -51,24 +54,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imgPreview = (ImageView) findViewById(R.id.imgPreview);
-        imgPreview.setImageResource(R.drawable.miley);
-
-
-        //TODO: Move IMAJADIO WORK to correct location
-        //Start IMAJADIO WORK
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inDensity = metrics.densityDpi;
+        options.inDensity = getResources().getDisplayMetrics().densityDpi;
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.linear_decreasing_freq, options);
 
-        Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.hz4950, options);
-        Imajadio imajadio = new Imajadio(test, 16, 0.1);
-        Log.e("IMAGE DIMENS (H/W)", test.getHeight() + "; " + test.getWidth());
-        AudioTrack track = imajadio.bitmapToAudio();
-        Log.e("PLAYING", "TRACK");
-        track.play();
-        //End IMAJADIO WORK
+        imgPreview = (ImageView) findViewById(R.id.imgPreview);
+        imgPreview.setImageBitmap(image);
+
+        playButton = (Button) findViewById(R.id.playButton);
+        playButton.setOnClickListener(new PlayButtonHandler());
     }
 
     @Override
@@ -101,12 +95,15 @@ public class MainActivity extends Activity {
             cursor.moveToFirst();
 
             int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String picturePath = cursor.getString(columnIndex);
+            String picturePath = cursor.getString(columnIndex); //contains the path of the selected image
             cursor.close();
 
-            // String picturePath contains the path of selected Image
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inDensity = getResources().getDisplayMetrics().densityDpi;
+            image = BitmapFactory.decodeFile(picturePath, options);
+            //Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.decreasing_freq, options); //used to test images in drawable/
 
-            imgPreview.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            imgPreview.setImageBitmap(image);
         }
     }//onActivityResult
 
@@ -347,4 +344,19 @@ public class MainActivity extends Activity {
             return success;
         }
     }//deleteLastFromDCIM
+
+    private class PlayButtonHandler implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            //Start IMAJADIO WORK
+            Imajadio imajadio = new Imajadio(image, 16, .1);
+            Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
+
+            audio = imajadio.bitmapToAudio();
+            Log.e("PLAYING", "TRACK");
+
+            audio.play();
+            //End IMAJADIO WORK
+        }
+    }
 }
