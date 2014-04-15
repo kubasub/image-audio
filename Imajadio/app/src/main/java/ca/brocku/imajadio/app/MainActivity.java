@@ -6,8 +6,10 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioTrack;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -73,7 +75,6 @@ public class MainActivity extends Activity {
         playButton.setOnClickListener(new PlayButtonHandler());
 
 
-
     }
 
     @Override
@@ -122,7 +123,7 @@ public class MainActivity extends Activity {
 
             imgPreview.setImageBitmap(image);
 
-           // image = ((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
+            // image = ((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
 
             imgPreview.setDrawingCacheEnabled(false);
             imgPreview.setDrawingCacheEnabled(true);
@@ -198,7 +199,7 @@ public class MainActivity extends Activity {
             case R.id.action_loadImage:
                 //load image from sdcard
                 Intent i = new Intent(
-                Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_IMAGE);
                 return true;
 
@@ -303,8 +304,32 @@ public class MainActivity extends Activity {
             // bitmap factory
             BitmapFactory.Options options = new BitmapFactory.Options();
 
-            final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(),
+            Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(),
                     options);
+
+            //fix for orientation
+            ExifInterface exif = new ExifInterface(fileUri.getPath());
+
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            Log.e("ORITENTATION", String.valueOf(orientation));
+            Matrix matrix = new Matrix();
+
+            if (orientation == 8) {
+                matrix.postRotate(270);
+            } else if (orientation == 3) {
+                matrix.postRotate(180);
+            } else if (orientation == 6) {
+                matrix.postRotate(90);
+            }
+
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            //end fix for orientation
+
+            //fix for huge resolution
+            if(bitmap.getWidth() >4096 || bitmap.getHeight() >4096){
+                bitmap = Bitmap.createScaledBitmap(bitmap,(int)(bitmap.getWidth()*.5),(int)(bitmap.getHeight()*.5),false);
+            }
+            //end fix for huge resolution
 
             imgPreview.setImageBitmap(bitmap);
 
@@ -314,6 +339,8 @@ public class MainActivity extends Activity {
 
 
         } catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }//previewCapturedImage
@@ -363,10 +390,10 @@ public class MainActivity extends Activity {
 
     private void deleteLastFromDCIM() {
 
-        File f = new File(Environment.getExternalStorageDirectory() + "/DCIM/Camera" );
+        File f = new File(Environment.getExternalStorageDirectory() + "/DCIM/Camera");
 
-        Log.i("Log", "file name in delete folder :  "+f.toString());
-        File [] files = f.listFiles();
+        Log.i("Log", "file name in delete folder :  " + f.toString());
+        File[] files = f.listFiles();
 
         //Log.i("Log", "List of files is: " +files.toString());
         Arrays.sort(files, new Comparator<Object>() {
@@ -397,7 +424,7 @@ public class MainActivity extends Activity {
                 Locale.getDefault()).format(new Date());
 
         String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Imajadio/";
-        FileOutputStream all = new FileOutputStream(fullPath + "IMAJADIO_"+timeStamp+".wav");
+        FileOutputStream all = new FileOutputStream(fullPath + "IMAJADIO_" + timeStamp + ".wav");
 
         //This creates the header for the wav file.
         WaveHeader w = new WaveHeader((short) 1, imajadio.getAudioChannelCount(), imajadio.getAudioSampleRate(), (short) 16, imajadio.getDATA().length);
@@ -415,7 +442,7 @@ public class MainActivity extends Activity {
 
             Toast.makeText(getApplicationContext(), "Saved audio to Imajadio folder", Toast.LENGTH_SHORT).show();
 
-                    } catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return true;
