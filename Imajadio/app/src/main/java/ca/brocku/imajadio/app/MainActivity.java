@@ -20,8 +20,11 @@ import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -30,6 +33,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import imajadio.Imajadio;
+import imajadio.WaveHeader;
 
 public class MainActivity extends Activity {
 
@@ -49,6 +53,7 @@ public class MainActivity extends Activity {
 
     private Bitmap image; //the image to be converted
     private AudioTrack audio; //contains the audio to play
+    private byte[] audioArray; //contains the actual audio array values
 
 
     @Override
@@ -162,6 +167,13 @@ public class MainActivity extends Activity {
                 return true;
 
             case R.id.action_exportAudio:
+
+                try {
+                    saveWav(audioArray);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+
                 return true;
 
             case R.id.action_newImage:
@@ -331,7 +343,7 @@ public class MainActivity extends Activity {
 
 
     private void deleteLastFromDCIM() {
-        // TODO Auto-generated method stub
+
         File f = new File(Environment.getExternalStorageDirectory() + "/DCIM/Camera" );
 
         Log.i("Log", "file name in delete folder :  "+f.toString());
@@ -360,6 +372,35 @@ public class MainActivity extends Activity {
     }//deleteLastFromDCIM
 
 
+    public boolean saveWav(byte[] in) throws FileNotFoundException {
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
+                Locale.getDefault()).format(new Date());
+
+        String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Imajadio/";
+        FileOutputStream all = new FileOutputStream(fullPath + "IMAJADIO_"+timeStamp+".wav");
+
+        //This creates the header for the wav file.
+        WaveHeader w = new WaveHeader((short) 1, (short) audio.getChannelCount(), audio.getSampleRate(), (short) 16, in.length);
+
+        Log.e("HEADERINFO", w.toString());
+
+        try {
+            //write header
+            w.write(all);
+
+            //write the data
+            all.write(in);
+
+            all.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }//save
+
+
+
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
@@ -368,6 +409,9 @@ public class MainActivity extends Activity {
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
             audio = imajadio.bitmapToAudio();
+
+            audioArray = imajadio.getDATA(); //used for saving as wav
+
             Log.e("PLAYING", "TRACK");
 
             audio.play();
