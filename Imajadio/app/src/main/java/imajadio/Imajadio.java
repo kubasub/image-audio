@@ -27,9 +27,7 @@ public class Imajadio {
     private final int MAX_AMPLITUDE;
 
     private byte[] DATA;
-    private int bitDepth;
-
-
+    private double highestAmplitude;
 
 
     private double grainDuration;
@@ -43,14 +41,15 @@ public class Imajadio {
         this(image, bitDepth, 1);
     }
 
-    public Imajadio(Bitmap image, int inBitDepth, double grainDuration) {
-        this.bitDepth = inBitDepth;
+    public Imajadio(Bitmap image, int bitDepth, double grainDuration) {
+
         this.IMAGE = image;
         this.IMAGE_HEIGHT = IMAGE.getHeight();
         this.IMAGE_WIDTH = IMAGE.getWidth();
         this.MAX_AMPLITUDE = (int) Math.pow(2, bitDepth - 1); //max amplitude is based on bit depth
 
         this.grainDuration = grainDuration;
+        this.highestAmplitude = 0;
     }
 
     public double getGrainDuration() {
@@ -131,7 +130,13 @@ public class Imajadio {
                 //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
             }
 
-            samples[sampleIndex] = (int) Math.floor(amplitude + 0.5); //rounds amplitude to an integer
+            samples[sampleIndex] = amplitude; //rounds amplitude to an integer
+
+            //hers stev
+            if(samples[sampleIndex] > highestAmplitude  ){
+                highestAmplitude = samples[sampleIndex];
+            }
+
         }
 
 
@@ -164,6 +169,9 @@ public class Imajadio {
     public byte[] getDATA(){
         return DATA;
     }
+
+
+    
 
 }//Imajadio
 

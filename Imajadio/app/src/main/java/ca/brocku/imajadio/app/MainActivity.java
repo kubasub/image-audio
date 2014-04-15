@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioTrack;
 import android.net.Uri;
 import android.os.Bundle;
@@ -114,9 +115,21 @@ public class MainActivity extends Activity {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inDensity = getResources().getDisplayMetrics().densityDpi;
             image = BitmapFactory.decodeFile(picturePath, options);
+
             //Bitmap test = BitmapFactory.decodeResource(this.getResources(), R.drawable.decreasing_freq, options); //used to test images in drawable/
 
             imgPreview.setImageBitmap(image);
+
+           // image = ((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
+
+            imgPreview.setDrawingCacheEnabled(false);
+            imgPreview.setDrawingCacheEnabled(true);
+            image = imgPreview.getDrawingCache();
+
+
+            Log.e("impreveiw height", String.valueOf(imgPreview.getHeight()));
+            Log.e("impreveiw weight", String.valueOf(imgPreview.getWidth()));
+
         }
     }//onActivityResult
 
@@ -293,6 +306,10 @@ public class MainActivity extends Activity {
 
             imgPreview.setImageBitmap(bitmap);
 
+            imgPreview.setDrawingCacheEnabled(false);
+            imgPreview.setDrawingCacheEnabled(true);
+            image = imgPreview.getDrawingCache();
+
 
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -393,7 +410,10 @@ public class MainActivity extends Activity {
             all.write(in);
 
             all.close();
-        } catch (IOException e) {
+
+            Toast.makeText(getApplicationContext(), "Saved audio to Imajadio folder", Toast.LENGTH_SHORT).show();
+
+                    } catch (IOException e) {
             e.printStackTrace();
         }
         return true;
@@ -405,6 +425,9 @@ public class MainActivity extends Activity {
         @Override
         public void onClick(View view) {
             //Start IMAJADIO WORK
+
+
+
             Imajadio imajadio = new Imajadio(image, 16, .1);
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
@@ -412,7 +435,7 @@ public class MainActivity extends Activity {
 
             audioArray = imajadio.getDATA(); //used for saving as wav
 
-            Log.e("PLAYING", "TRACK");
+
 
             audio.play();
             //End IMAJADIO WORK
