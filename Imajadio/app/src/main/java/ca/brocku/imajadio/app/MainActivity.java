@@ -40,6 +40,8 @@ public class MainActivity extends Activity {
 
     private ShareActionProvider mShareActionProvider;
 
+    Imajadio imajadio;
+
     // Activity request codes
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     public static final int MEDIA_TYPE_IMAGE = 1;
@@ -53,8 +55,6 @@ public class MainActivity extends Activity {
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
 
     private Bitmap image; //the image to be converted
-    private AudioTrack audio; //contains the audio to play
-    private byte[] audioArray; //contains the actual audio array values
 
 
     @Override
@@ -71,6 +71,8 @@ public class MainActivity extends Activity {
 
         playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new PlayButtonHandler());
+
+
 
     }
 
@@ -182,7 +184,7 @@ public class MainActivity extends Activity {
             case R.id.action_exportAudio:
 
                 try {
-                    saveWav(audioArray);
+                    saveWav();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -389,7 +391,7 @@ public class MainActivity extends Activity {
     }//deleteLastFromDCIM
 
 
-    public boolean saveWav(byte[] in) throws FileNotFoundException {
+    public boolean saveWav() throws FileNotFoundException {
 
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
@@ -398,7 +400,7 @@ public class MainActivity extends Activity {
         FileOutputStream all = new FileOutputStream(fullPath + "IMAJADIO_"+timeStamp+".wav");
 
         //This creates the header for the wav file.
-        WaveHeader w = new WaveHeader((short) 1, (short) audio.getChannelCount(), audio.getSampleRate(), (short) 16, in.length);
+        WaveHeader w = new WaveHeader((short) 1, imajadio.getAudioChannelCount(), imajadio.getAudioSampleRate(), (short) 16, imajadio.getDATA().length);
 
         Log.e("HEADERINFO", w.toString());
 
@@ -407,7 +409,7 @@ public class MainActivity extends Activity {
             w.write(all);
 
             //write the data
-            all.write(in);
+            all.write(imajadio.getDATA());
 
             all.close();
 
@@ -419,25 +421,19 @@ public class MainActivity extends Activity {
         return true;
     }//save
 
-
-
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
             //Start IMAJADIO WORK
 
-
-
-            Imajadio imajadio = new Imajadio(image, 16, .1);
+            imajadio = new Imajadio(image, 16, .1);
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
-            audio = imajadio.bitmapToAudio();
+            imajadio.bitmapToAudio();
 
-            audioArray = imajadio.getDATA(); //used for saving as wav
+            imajadio.audioNormalize();
 
-
-
-            audio.play();
+            imajadio.play();
             //End IMAJADIO WORK
         }
     }

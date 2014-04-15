@@ -29,8 +29,9 @@ public class Imajadio {
     private byte[] DATA;
     private double highestAmplitude;
 
-
     private double grainDuration;
+
+    private AudioTrack audio; //contains the audio to play
 
 
     public Imajadio(Bitmap image) {
@@ -68,7 +69,7 @@ public class Imajadio {
      *
      * @return AudioTrack   an instance which has the audio written out to it
      */
-    public AudioTrack bitmapToAudio() {
+    public void bitmapToAudio() {
         double[] samples = new double[(int) (grainDuration * SAMPLE_RATE)];
         byte[] generatedSnd = new byte[IMAGE_WIDTH * 2 * samples.length];
         int idx = 0;
@@ -98,7 +99,7 @@ public class Imajadio {
         }
         audioTrack.write(generatedSnd, 0, generatedSnd.length);
 
-        return audioTrack;
+        audio = audioTrack;
     }
 
     private double[] columnToSamples(int[] column, int columnIndex) {
@@ -133,8 +134,8 @@ public class Imajadio {
             samples[sampleIndex] = amplitude; //rounds amplitude to an integer
 
             //hers stev
-            if(samples[sampleIndex] > highestAmplitude  ){
-                highestAmplitude = samples[sampleIndex];
+            if (Math.abs(samples[sampleIndex]) > highestAmplitude) {
+                highestAmplitude = Math.abs(samples[sampleIndex]);
             }
 
         }
@@ -166,12 +167,44 @@ public class Imajadio {
         return new Harmonic(frequency, amplitude);
     }
 
-    public byte[] getDATA(){
+    public void play() {
+        audio.play();
+    }
+
+    public byte[] getDATA() {
         return DATA;
     }
 
+    public short getAudioChannelCount() {
+        return (short) audio.getChannelCount();
+    }
 
-    
+    public int getAudioSampleRate() {
+        return audio.getSampleRate();
+    }
+
+    public void audioNormalize(){
+
+        double multiplier = MAX_AMPLITUDE/highestAmplitude; //what to multiply every sample by.
+
+        for(int i=0; i< DATA.length/2;i=i+2){
+
+            int k = (int)((twoBytesToAmplitude(DATA[i],DATA[i+1]))* multiplier);
+
+           // Log.e("iiiii...", String.valueOf(i));
+           // Log.e("First...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
+
+            DATA[i] = (byte) (k & 0x00ff);
+            DATA[i+1] = (byte) ((k & 0xff00) >>> 8);
+
+          // Log.e("After...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
+        }
+    }//audioNormalize
+
+    private static double twoBytesToAmplitude(byte b1, byte b2) {
+        return ((b2 << 8) | (b1 & 0xFF));
+    }
+
 
 }//Imajadio
 
