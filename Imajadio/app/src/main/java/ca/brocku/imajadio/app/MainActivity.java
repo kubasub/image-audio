@@ -13,6 +13,9 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -20,7 +23,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.DataOutputStream;
@@ -54,6 +59,13 @@ public class MainActivity extends Activity {
 
     private ImageView imgPreview;
     private Button playButton;
+    private View progressBar;
+    private SeekBar grainDurationSeekBar;
+    private TextView param1test;
+
+    int progressBarWait=0;
+
+
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
 
     private Bitmap image; //the image to be converted
@@ -67,6 +79,14 @@ public class MainActivity extends Activity {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
         image = BitmapFactory.decodeResource(this.getResources(), R.drawable.linear_decreasing_freq, options);
+
+        progressBar = (View) findViewById(R.id.progressBar);
+
+        grainDurationSeekBar = (SeekBar)findViewById(R.id.seekBarGrainDuration);
+        grainDurationSeekBar.setOnSeekBarChangeListener(new SeekBarHandler());
+
+        //just for now to test seek bar
+        param1test = (TextView)findViewById(R.id.Param1Text);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
         imgPreview.setImageBitmap(image);
@@ -326,8 +346,8 @@ public class MainActivity extends Activity {
             //end fix for orientation
 
             //fix for huge resolution
-            if(bitmap.getWidth() >4096 || bitmap.getHeight() >4096){
-                bitmap = Bitmap.createScaledBitmap(bitmap,(int)(bitmap.getWidth()*.5),(int)(bitmap.getHeight()*.5),false);
+            if (bitmap.getWidth() > 4096 || bitmap.getHeight() > 4096) {
+                bitmap = Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * .5), (int) (bitmap.getHeight() * .5), false);
             }
             //end fix for huge resolution
 
@@ -448,20 +468,83 @@ public class MainActivity extends Activity {
         return true;
     }//save
 
+    Handler handie = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            int position = b.getInt("PROGRESS_POSITION");
+            progressBar.setX(position);
+        }
+    };
+    Thread thread = new Thread(new Runnable() {
+
+        @Override
+        public void run() {
+
+            for (int i = 0; i < imgPreview.getWidth(); i ++) {
+
+                try {
+                    Thread.sleep(grainDurationSeekBar.getProgress()*10);
+                    onUpdateProgressBar(i);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            
+        }
+
+    });
+
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            //Start IMAJADIO WORK
-
-            imajadio = new Imajadio(image, 16, .1);
+            imajadio = new Imajadio(image, 16, grainDurationSeekBar.getProgress()*.01);
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
             imajadio.bitmapToAudio();
-
             imajadio.audioNormalize();
 
+            thread.start();
+
+
+
+
             imajadio.play();
-            //End IMAJADIO WORK
+
+
+        }
+    }//PlayButtonHandler
+
+    private class SeekBarHandler implements SeekBar.OnSeekBarChangeListener {
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+           float prog = (float)(progress*.01);
+            param1test.setText(String.valueOf(prog));
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
         }
     }
+
+
+
+
+
+    public void onUpdateProgressBar(int i) {
+        Message message = new Message();
+        Bundle b = new Bundle();
+        b.putInt("PROGRESS_POSITION", i);
+        message.setData(b);
+        handie.sendMessage(message);
+    }
+
 }

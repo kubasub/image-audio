@@ -3,25 +3,28 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_alignParentLeft="true"
-    android:layout_alignParentStart="true"
-    >
+    android:layout_alignParentStart="true">
 
-
-    <ImageView
-        android:id="@+id/imgPreview"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="visible"
-        android:layout_gravity="center_vertical|right"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:scaleType="centerCrop"
-        />
+        android:layout_weight="1">
 
+        <ImageView
+            android:id="@+id/imgPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            android:layout_gravity="center_vertical|right"
+            android:scaleType="centerCrop" />
+
+        <View
+            android:id="@+id/progressBar"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@drawable/statusbar" />
+
+    </FrameLayout>
 
     <LinearLayout
         android:orientation="vertical"
@@ -44,10 +47,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="PLAY"
-
                 android:id="@+id/playButton"
-                android:layout_centerHorizontal="true"
-                />
+                android:layout_centerHorizontal="true" />
 
 
             <ToggleButton
@@ -57,9 +58,7 @@
                 android:textOn="On"
                 android:textOff="Off"
                 android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"/>
-
-
+                android:layout_alignParentEnd="true" />
 
         </RelativeLayout>
 
@@ -79,12 +78,8 @@
             <SeekBar
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/seekBar"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
+                android:id="@+id/seekBarGrainDuration"
+                android:progress="10"
                 android:progressDrawable="@drawable/styled_progress"
                 android:indeterminate="false" />
 
@@ -100,8 +95,7 @@
                 android:layout_height="match_parent"
                 android:text="Param2"
                 android:gravity="center_vertical"
-                android:id="@+id/Param2Text"
-                />
+                android:id="@+id/Param2Text" />
 
             <SeekBar
                 android:layout_width="match_parent"
@@ -117,13 +111,8 @@
                 android:indeterminate="false"
 
 
-
-           />
-
+                />
 
         </LinearLayout>
-
-
     </LinearLayout>
-
 </LinearLayout>
