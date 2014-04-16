@@ -18,7 +18,7 @@ import java.io.IOException;
  * @date April 12, 2014
  */
 public class Imajadio {
-    private final int NUMBER_OF_FREQUENCIES = 10000 - 100; //frequency range from 100-10000 Hz
+    private final int NUMBER_OF_FREQUENCIES = 4000 - 100; //frequency range from 100-10000 Hz
     private final int SAMPLE_RATE = 8000;
 
     private final Bitmap IMAGE;
@@ -27,12 +27,11 @@ public class Imajadio {
     private final int MAX_AMPLITUDE;
 
     private byte[] DATA;
-    private int bitDepth;
-
-
-
+    private double highestAmplitude;
 
     private double grainDuration;
+
+    private AudioTrack audio; //contains the audio to play
 
 
     public Imajadio(Bitmap image) {
@@ -43,14 +42,15 @@ public class Imajadio {
         this(image, bitDepth, 1);
     }
 
-    public Imajadio(Bitmap image, int inBitDepth, double grainDuration) {
-        this.bitDepth = inBitDepth;
+    public Imajadio(Bitmap image, int bitDepth, double grainDuration) {
+
         this.IMAGE = image;
         this.IMAGE_HEIGHT = IMAGE.getHeight();
         this.IMAGE_WIDTH = IMAGE.getWidth();
         this.MAX_AMPLITUDE = (int) Math.pow(2, bitDepth - 1); //max amplitude is based on bit depth
 
         this.grainDuration = grainDuration;
+        this.highestAmplitude = 0;
     }
 
     public double getGrainDuration() {
@@ -69,12 +69,12 @@ public class Imajadio {
      *
      * @return AudioTrack   an instance which has the audio written out to it
      */
-    public AudioTrack bitmapToAudio() {
+    public void bitmapToAudio() {
         double[] samples = new double[(int) (grainDuration * SAMPLE_RATE)];
         byte[] generatedSnd = new byte[IMAGE_WIDTH * 2 * samples.length];
         int idx = 0;
 
-        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+        audio = new AudioTrack(AudioManager.STREAM_MUSIC,
                 SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT, 2 * samples.length * IMAGE_WIDTH,
                 AudioTrack.MODE_STATIC);
@@ -97,9 +97,7 @@ public class Imajadio {
             }
             DATA = generatedSnd;
         }
-        audioTrack.write(generatedSnd, 0, generatedSnd.length);
-
-        return audioTrack;
+        audio.write(generatedSnd, 0, generatedSnd.length);
     }
 
     private double[] columnToSamples(int[] column, int columnIndex) {
@@ -125,13 +123,21 @@ public class Imajadio {
                 //amplitude+= h.getAmplitude() * Math.sin(w * h.getFrequency() * sampleIndex);
                 //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex / (SAMPLE_RATE/h.getFrequency()));
 
+               // amplitude * Math.sin( (2*Math.PI * j) / samplingRate/frequency)
+
                 //equations which do not produce a stutter between columns
                 // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
-                amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
-                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
+                //amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
+                amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
             }
 
-            samples[sampleIndex] = (int) Math.floor(amplitude + 0.5); //rounds amplitude to an integer
+            samples[sampleIndex] = amplitude; //rounds amplitude to an integer
+
+            //hers stev
+            if (Math.abs(samples[sampleIndex]) > highestAmplitude) {
+                highestAmplitude = Math.abs(samples[sampleIndex]);
+            }
+
         }
 
 
@@ -161,8 +167,45 @@ public class Imajadio {
         return new Harmonic(frequency, amplitude);
     }
 
-    public byte[] getDATA(){
+    public void play() {
+        audio.play();
+    }
+
+    public byte[] getDATA() {
         return DATA;
     }
+
+    public short getAudioChannelCount() {
+        return (short) audio.getChannelCount();
+    }
+
+    public int getAudioSampleRate() {
+        return audio.getSampleRate();
+    }
+
+    public void normalizeAudio(){
+
+        double multiplier = MAX_AMPLITUDE/highestAmplitude; //what to multiply every sample by.
+
+        for(int i=0; i< DATA.length;i=i+2){
+
+            int k = (int)((twoBytesToAmplitude(DATA[i],DATA[i+1]))* multiplier);
+
+           // Log.e("iiiii...", String.valueOf(i));
+           // Log.e("First...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
+
+            DATA[i] = (byte) (k & 0x00ff);
+            DATA[i+1] = (byte) ((k & 0xff00) >>> 8);
+
+          // Log.e("After...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
+        }
+        //audio.write(DATA, 0, DATA.length);
+
+    }//normalizeAudio
+
+    private static double twoBytesToAmplitude(byte b1, byte b2) {
+        return ((b2 << 8) | (b1 & 0xFF));
+    }
+
 
 }//Imajadio
