@@ -7,8 +7,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.media.AudioTrack;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,7 +26,6 @@ import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -78,7 +75,7 @@ public class MainActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
-        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.linear_decreasing_freq, options);
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.dots, options);
 
         progressBar = (View) findViewById(R.id.progressBar);
 
@@ -503,7 +500,12 @@ public class MainActivity extends Activity {
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
             imajadio.bitmapToAudio();
-            imajadio.audioNormalize();
+
+            imajadio.normalizeAudio();
+
+
+            imajadio.normalizeAudio();
+
 
             thread.start();
 

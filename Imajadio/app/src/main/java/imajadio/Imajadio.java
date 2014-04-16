@@ -18,7 +18,7 @@ import java.io.IOException;
  * @date April 12, 2014
  */
 public class Imajadio {
-    private final int NUMBER_OF_FREQUENCIES = 10000 - 100; //frequency range from 100-10000 Hz
+    private final int NUMBER_OF_FREQUENCIES = 4000 - 100; //frequency range from 100-10000 Hz
     private final int SAMPLE_RATE = 8000;
 
     private final Bitmap IMAGE;
@@ -74,7 +74,7 @@ public class Imajadio {
         byte[] generatedSnd = new byte[IMAGE_WIDTH * 2 * samples.length];
         int idx = 0;
 
-        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+        audio = new AudioTrack(AudioManager.STREAM_MUSIC,
                 SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO,
                 AudioFormat.ENCODING_PCM_16BIT, 2 * samples.length * IMAGE_WIDTH,
                 AudioTrack.MODE_STATIC);
@@ -97,9 +97,7 @@ public class Imajadio {
             }
             DATA = generatedSnd;
         }
-        audioTrack.write(generatedSnd, 0, generatedSnd.length);
-
-        audio = audioTrack;
+        audio.write(generatedSnd, 0, generatedSnd.length);
     }
 
     private double[] columnToSamples(int[] column, int columnIndex) {
@@ -125,10 +123,12 @@ public class Imajadio {
                 //amplitude+= h.getAmplitude() * Math.sin(w * h.getFrequency() * sampleIndex);
                 //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex / (SAMPLE_RATE/h.getFrequency()));
 
+               // amplitude * Math.sin( (2*Math.PI * j) / samplingRate/frequency)
+
                 //equations which do not produce a stutter between columns
                 // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
-                amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
-                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
+                //amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
+                amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
             }
 
             samples[sampleIndex] = amplitude; //rounds amplitude to an integer
@@ -183,11 +183,11 @@ public class Imajadio {
         return audio.getSampleRate();
     }
 
-    public void audioNormalize(){
+    public void normalizeAudio(){
 
         double multiplier = MAX_AMPLITUDE/highestAmplitude; //what to multiply every sample by.
 
-        for(int i=0; i< DATA.length/2;i=i+2){
+        for(int i=0; i< DATA.length;i=i+2){
 
             int k = (int)((twoBytesToAmplitude(DATA[i],DATA[i+1]))* multiplier);
 
@@ -199,7 +199,9 @@ public class Imajadio {
 
           // Log.e("After...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
         }
-    }//audioNormalize
+        //audio.write(DATA, 0, DATA.length);
+
+    }//normalizeAudio
 
     private static double twoBytesToAmplitude(byte b1, byte b2) {
         return ((b2 << 8) | (b1 & 0xFF));
@@ -207,5 +209,3 @@ public class Imajadio {
 
 
 }//Imajadio
-
-
