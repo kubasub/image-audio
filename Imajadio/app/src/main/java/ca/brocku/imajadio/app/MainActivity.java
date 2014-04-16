@@ -63,13 +63,14 @@ public class MainActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
-        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.linear_decreasing_freq, options);
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.pitches4, options);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
         imgPreview.setImageBitmap(image);
 
         playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new PlayButtonHandler());
+
 
     }
 
