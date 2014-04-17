@@ -469,28 +469,11 @@ public class MainActivity extends Activity {
             Bundle b = msg.getData();
             int position = b.getInt("PROGRESS_POSITION");
             //Log.e("onUpdateProgessBar i ",String.valueOf(position));
+
             progressBar.setX(position);
         }
     };
-    Thread thread = new Thread(new Runnable() {
 
-        @Override
-        public void run() {
-
-            for (int i = 0; i < imgPreview.getWidth(); i++) {
-
-                try {
-                    Thread.sleep(grainDurationSeekBar.getProgress() * 10);
-                    onUpdateProgressBar(i);
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            onUpdateProgressBar(0);
-
-        }
-    });
 
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
@@ -500,24 +483,33 @@ public class MainActivity extends Activity {
 
             imajadio.bitmapToAudio();
 
-          //  imajadio.normalizeAudio();
+            imajadio.normalizeAudio();
 
+            Thread thread = new Thread(new Runnable() {
 
+                @Override
+                public void run() {
 
+                    for (int i = 0; i < imgPreview.getWidth(); i++) {
 
+                        try {
+                            Thread.sleep(grainDurationSeekBar.getProgress() * 10);
+                            onUpdateProgressBar(i);
 
-            //imajadio.play();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    onUpdateProgressBar(0);
 
-            if (thread.getState().toString().equals("NEW")) {
-                Log.e("Thread is fucking new", "");
-                thread.start();
-            } else {
-                Log.e("Thread is NOTTT fucking new", "");
+                }
+            });
 
-                thread.run();
-            }
+            thread.start();
+
+            imajadio.play();
+
         }
-
 
     }//PlayButtonHandler
 
