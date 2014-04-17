@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -60,7 +59,6 @@ public class MainActivity extends Activity {
     private SeekBar grainDurationSeekBar;
     private TextView param1test;
 
-    int progressBarWait=0;
 
 
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
@@ -79,11 +77,11 @@ public class MainActivity extends Activity {
 
         progressBar = (View) findViewById(R.id.progressBar);
 
-        grainDurationSeekBar = (SeekBar)findViewById(R.id.seekBarGrainDuration);
+        grainDurationSeekBar = (SeekBar) findViewById(R.id.seekBarGrainDuration);
         grainDurationSeekBar.setOnSeekBarChangeListener(new SeekBarHandler());
 
         //just for now to test seek bar
-        param1test = (TextView)findViewById(R.id.Param1Text);
+        param1test = (TextView) findViewById(R.id.Param1Text);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
         imgPreview.setImageBitmap(image);
@@ -470,6 +468,7 @@ public class MainActivity extends Activity {
         public void handleMessage(Message msg) {
             Bundle b = msg.getData();
             int position = b.getInt("PROGRESS_POSITION");
+            //Log.e("onUpdateProgessBar i ",String.valueOf(position));
             progressBar.setX(position);
         }
     };
@@ -478,51 +477,55 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
 
-            for (int i = 0; i < imgPreview.getWidth(); i ++) {
+            for (int i = 0; i < imgPreview.getWidth(); i++) {
 
                 try {
-                    Thread.sleep(grainDurationSeekBar.getProgress()*10);
+                    Thread.sleep(grainDurationSeekBar.getProgress() * 10);
                     onUpdateProgressBar(i);
+
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
-            
-        }
+            onUpdateProgressBar(0);
 
+        }
     });
 
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            imajadio = new Imajadio(image, 16, grainDurationSeekBar.getProgress()*.01);
+            imajadio = new Imajadio(image, 16, grainDurationSeekBar.getProgress() * .01);
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
             imajadio.bitmapToAudio();
 
-            imajadio.normalizeAudio();
-
-
-            imajadio.normalizeAudio();
-
-
-            thread.start();
+          //  imajadio.normalizeAudio();
 
 
 
 
-            imajadio.play();
 
+            //imajadio.play();
 
+            if (thread.getState().toString().equals("NEW")) {
+                Log.e("Thread is fucking new", "");
+                thread.start();
+            } else {
+                Log.e("Thread is NOTTT fucking new", "");
+
+                thread.run();
+            }
         }
+
+
     }//PlayButtonHandler
 
     private class SeekBarHandler implements SeekBar.OnSeekBarChangeListener {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-           float prog = (float)(progress*.01);
+            float prog = (float) (progress * .01);
             param1test.setText(String.valueOf(prog));
         }
 
@@ -536,9 +539,6 @@ public class MainActivity extends Activity {
 
         }
     }
-
-
-
 
 
     public void onUpdateProgressBar(int i) {

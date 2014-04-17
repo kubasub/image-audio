@@ -22,7 +22,8 @@
             android:id="@+id/progressBar"
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@drawable/statusbar" />
+            android:background="@drawable/statusbar"
+            />
 
     </FrameLayout>
 
