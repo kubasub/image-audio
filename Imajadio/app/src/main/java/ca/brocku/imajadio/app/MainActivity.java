@@ -59,6 +59,8 @@ public class MainActivity extends Activity {
     private SeekBar grainDurationSeekBar;
     private TextView param1test;
 
+    private float grainDuration;
+
 
 
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
@@ -71,6 +73,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
         image = BitmapFactory.decodeResource(this.getResources(), R.drawable.dots, options);
@@ -79,6 +82,8 @@ public class MainActivity extends Activity {
 
         grainDurationSeekBar = (SeekBar) findViewById(R.id.seekBarGrainDuration);
         grainDurationSeekBar.setOnSeekBarChangeListener(new SeekBarHandler());
+        grainDuration=0.025f;
+
 
         //just for now to test seek bar
         param1test = (TextView) findViewById(R.id.Param1Text);
@@ -470,7 +475,11 @@ public class MainActivity extends Activity {
             int position = b.getInt("PROGRESS_POSITION");
             //Log.e("onUpdateProgessBar i ",String.valueOf(position));
 
-            progressBar.setX(position);
+            if(position == -1){
+                progressBar.setVisibility(progressBar.getVisibility()==View.GONE ? View.VISIBLE : View.GONE);
+            } else {
+                progressBar.setX(position);
+            }
         }
     };
 
@@ -478,36 +487,41 @@ public class MainActivity extends Activity {
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            imajadio = new Imajadio(image, 16, grainDurationSeekBar.getProgress() * .01);
+            imajadio = new Imajadio(image, 16, grainDuration);
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
             imajadio.bitmapToAudio();
 
             imajadio.normalizeAudio();
 
-            Thread thread = new Thread(new Runnable() {
+            imajadio.play();
+
+            new Thread(new Runnable() {
 
                 @Override
                 public void run() {
 
+                    onUpdateProgressBar(-1);
+
                     for (int i = 0; i < imgPreview.getWidth(); i++) {
 
                         try {
-                            Thread.sleep(grainDurationSeekBar.getProgress() * 10);
                             onUpdateProgressBar(i);
+                            Thread.sleep((long)(grainDuration * 1000));
+
 
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
-                    onUpdateProgressBar(0);
+                    onUpdateProgressBar(-1);
 
                 }
-            });
+            }).start();
 
-            thread.start();
 
-            imajadio.play();
+
+
 
         }
 
@@ -517,8 +531,8 @@ public class MainActivity extends Activity {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-            float prog = (float) (progress * .01);
-            param1test.setText(String.valueOf(prog));
+            grainDuration = (float) ((progress+1) * .001);
+            param1test.setText(String.valueOf(grainDuration));
         }
 
         @Override

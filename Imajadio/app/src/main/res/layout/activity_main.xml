@@ -23,6 +23,7 @@
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:background="@drawable/statusbar"
+            android:visibility="gone"
             />
 
     </FrameLayout>
@@ -80,8 +81,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/seekBarGrainDuration"
-                android:progress="10"
-                android:progressDrawable="@drawable/styled_progress"
+                android:progress="25"
+                android:max="49"
+                   android:progressDrawable="@drawable/styled_progress"
                 android:indeterminate="false" />
 
         </LinearLayout>
