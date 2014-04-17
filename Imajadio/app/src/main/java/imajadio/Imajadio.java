@@ -110,30 +110,19 @@ public class Imajadio {
 
         int numSamples = (int) (grainDuration * SAMPLE_RATE);
         double[] samples = new double[numSamples];
-
-        double w = 2 * Math.PI / numSamples;
-
+        double amplitude;
 
         for (int sampleIndex = 0; sampleIndex < numSamples; sampleIndex++) { //for each sample in the output table
-            double amplitude = 0;
+            amplitude = 0;
 
             for (Harmonic h : harmonics) { //add the amplitude of each harmonic
 
-                //equations which produce a stutter between columns
-                //amplitude+= h.getAmplitude() * Math.sin(w * h.getFrequency() * sampleIndex);
-                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex / (SAMPLE_RATE/h.getFrequency()));
-
-               // amplitude * Math.sin( (2*Math.PI * j) / samplingRate/frequency)
-
-                //equations which do not produce a stutter between columns
                 // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
                 //amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
                 amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
             }
+            samples[sampleIndex] = amplitude;
 
-            samples[sampleIndex] = amplitude; //rounds amplitude to an integer
-
-            //hers stev
             if (Math.abs(samples[sampleIndex]) > highestAmplitude) {
                 highestAmplitude = Math.abs(samples[sampleIndex]);
             }
