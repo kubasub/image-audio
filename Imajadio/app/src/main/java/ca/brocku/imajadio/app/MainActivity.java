@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
@@ -57,10 +59,15 @@ public class MainActivity extends Activity {
     private Button playButton;
     private View progressBar;
     private SeekBar grainDurationSeekBar;
-    private TextView param1test;
+    private TextView progressText;
+
+    private ProgressBar loadingSpinner;
 
     private float grainDuration;
+    private float realGrainDuration;
 
+
+    private boolean readyToPlay = false;
 
 
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
@@ -82,17 +89,22 @@ public class MainActivity extends Activity {
 
         grainDurationSeekBar = (SeekBar) findViewById(R.id.seekBarGrainDuration);
         grainDurationSeekBar.setOnSeekBarChangeListener(new SeekBarHandler());
-        grainDuration=0.025f;
+        grainDuration = 0.025f;
 
 
-        //just for now to test seek bar
-        param1test = (TextView) findViewById(R.id.Param1Text);
+        progressText = (TextView) findViewById(R.id.progressText);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
         imgPreview.setImageBitmap(image);
 
         playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new PlayButtonHandler());
+
+        loadingSpinner = (ProgressBar) findViewById(R.id.progressSpinner);
+
+
+        playButton.setText("Convert");
+        loadingSpinner.setVisibility(View.GONE);
 
 
     }
@@ -116,6 +128,8 @@ public class MainActivity extends Activity {
                 File file = new File(fileUri.getPath());
                 boolean deleted = file.delete();
 
+                readyToPlay = false;
+                playButton.setText("Convert");
 
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
@@ -152,6 +166,9 @@ public class MainActivity extends Activity {
 
             Log.e("impreveiw height", String.valueOf(imgPreview.getHeight()));
             Log.e("impreveiw weight", String.valueOf(imgPreview.getWidth()));
+
+            readyToPlay = false;
+            playButton.setText("Convert");
 
         }
     }//onActivityResult
@@ -468,60 +485,42 @@ public class MainActivity extends Activity {
         return true;
     }//save
 
-    Handler handie = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Bundle b = msg.getData();
-            int position = b.getInt("PROGRESS_POSITION");
-            //Log.e("onUpdateProgessBar i ",String.valueOf(position));
-
-            if(position == -1){
-                progressBar.setVisibility(progressBar.getVisibility()==View.GONE ? View.VISIBLE : View.GONE);
-            } else {
-                progressBar.setX(position);
-            }
-        }
-    };
-
 
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            imajadio = new Imajadio(image, 16, grainDuration);
-            Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
-            imajadio.bitmapToAudio();
+            if (readyToPlay == true) {
+                imajadio.play();
+                new Thread(new Runnable() {
 
-            imajadio.normalizeAudio();
+                    @Override
+                    public void run() {
 
-            imajadio.play();
+                        onUpdateProgressBar(-1);
 
-            new Thread(new Runnable() {
+                        for (int i = 0; i < imgPreview.getWidth(); i++) {
 
-                @Override
-                public void run() {
-
-                    onUpdateProgressBar(-1);
-
-                    for (int i = 0; i < imgPreview.getWidth(); i++) {
-
-                        try {
-                            onUpdateProgressBar(i);
-                            Thread.sleep((long)(grainDuration * 1000));
+                            try {
+                                onUpdateProgressBar(i);
+                                Thread.sleep((long) (realGrainDuration * 1000));
 
 
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
+                        onUpdateProgressBar(-1);
+
+
                     }
-                    onUpdateProgressBar(-1);
-
-                }
-            }).start();
+                }).start();
+            } else {
 
 
+                new AsyncTaskImajadio().execute();
 
-
+            }
 
         }
 
@@ -531,8 +530,11 @@ public class MainActivity extends Activity {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-            grainDuration = (float) ((progress+1) * .001);
-            param1test.setText(String.valueOf(grainDuration));
+            grainDuration = (float) ((progress + 1) * .001);
+            progressText.setText(String.valueOf(grainDuration));
+
+            readyToPlay = false;
+            playButton.setText("Convert");
         }
 
         @Override
@@ -546,6 +548,19 @@ public class MainActivity extends Activity {
         }
     }
 
+    Handler handie = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            int position = b.getInt("PROGRESS_POSITION");
+
+            if (position == -1) {
+                progressBar.setVisibility(progressBar.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+            } else {
+                progressBar.setX(position);
+            }
+        }
+    };
 
     public void onUpdateProgressBar(int i) {
         Message message = new Message();
@@ -555,4 +570,40 @@ public class MainActivity extends Activity {
         handie.sendMessage(message);
     }
 
+
+    private class AsyncTaskImajadio extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            realGrainDuration=grainDuration;
+            loadingSpinner.setVisibility(View.VISIBLE);
+            playButton.setEnabled(false);
+            grainDurationSeekBar.setEnabled(false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            imajadio = new Imajadio(image, 16, grainDuration);
+            Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
+
+            imajadio.bitmapToAudio();
+
+            imajadio.normalizeAudio();
+
+            readyToPlay = true;
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
+            playButton.setText("PLAY");
+            loadingSpinner.setVisibility(View.GONE);
+
+            playButton.setEnabled(true);
+            grainDurationSeekBar.setEnabled(true);
+        }
+    }//AsyncTaskImajadio
 }

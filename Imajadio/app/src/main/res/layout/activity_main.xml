@@ -26,29 +26,30 @@
             android:visibility="gone"
             />
 
+        <ProgressBar
+            android:id="@+id/progressSpinner"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="gone"
+          />
+
+
     </FrameLayout>
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="10dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="56dp">
 
-            <Button
+              <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PLAY"
-                android:id="@+id/button"
-                android:layout_centerHorizontal="true"
-                android:visibility="visible" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="PLAY"
                 android:id="@+id/playButton"
                 android:layout_centerHorizontal="true" />
 
@@ -70,21 +71,34 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Param1"
                 android:gravity="center_vertical"
-                android:id="@+id/Param1Text" />
+                android:id="@+id/Param1Text"
+
+                android:layout_weight="1"/>
 
 
             <SeekBar
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/seekBarGrainDuration"
                 android:progress="25"
                 android:max="49"
                    android:progressDrawable="@drawable/styled_progress"
-                android:indeterminate="false" />
+                android:indeterminate="false"
+                android:layout_weight="4"
+                />
+
+            <TextView
+                android:layout_weight="0.75"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="0.025"
+                android:gravity="center_vertical"
+                android:id="@+id/progressText"
+                />
 
         </LinearLayout>
 
@@ -94,14 +108,16 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="Param2"
                 android:gravity="center_vertical"
-                android:id="@+id/Param2Text" />
+                android:id="@+id/Param2Text"
+
+                android:layout_weight="1"/>
 
             <SeekBar
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/seekBar2"
                 android:layout_above="@+id/seekBar"
@@ -112,8 +128,16 @@
                 android:gravity="center_vertical"
                 android:progressDrawable="@drawable/styled_progress"
                 android:indeterminate="false"
+                android:layout_weight="4"/>
 
 
+            <TextView
+                android:layout_weight="0.75"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="0.000"
+                android:gravity="center_vertical"
+                android:id="@+id/textVieww"
                 />
 
         </LinearLayout>

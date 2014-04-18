@@ -119,7 +119,7 @@ public class Imajadio {
 
                 // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
                 //amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
-                amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*columnIndex)+sampleIndex) / (SAMPLE_RATE/h.getFrequency()));
+                amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) / (SAMPLE_RATE / h.getFrequency()));
             }
             samples[sampleIndex] = amplitude;
 
@@ -157,6 +157,12 @@ public class Imajadio {
     }
 
     public void play() {
+
+        if (audio.getPlayState() == 3) {
+            audio.stop();
+            audio.reloadStaticData();
+        }
+
         audio.play();
     }
 
@@ -172,21 +178,21 @@ public class Imajadio {
         return audio.getSampleRate();
     }
 
-    public void normalizeAudio(){
+    public void normalizeAudio() {
 
-        double multiplier = MAX_AMPLITUDE/highestAmplitude; //what to multiply every sample by.
+        double multiplier = MAX_AMPLITUDE / highestAmplitude; //what to multiply every sample by.
 
-        for(int i=0; i< DATA.length;i=i+2){
+        for (int i = 0; i < DATA.length; i = i + 2) {
 
-            int k = (int)((twoBytesToAmplitude(DATA[i],DATA[i+1]))* multiplier);
+            int k = (int) ((twoBytesToAmplitude(DATA[i], DATA[i + 1])) * multiplier);
 
-           // Log.e("iiiii...", String.valueOf(i));
-           // Log.e("First...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
+            // Log.e("iiiii...", String.valueOf(i));
+            // Log.e("First...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
 
             DATA[i] = (byte) (k & 0x00ff);
-            DATA[i+1] = (byte) ((k & 0xff00) >>> 8);
+            DATA[i + 1] = (byte) ((k & 0xff00) >>> 8);
 
-          // Log.e("After...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
+            // Log.e("After...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
         }
         //audio.write(DATA, 0, DATA.length);
 
