@@ -29,10 +29,23 @@
         <ProgressBar
             android:id="@+id/progressSpinner"
             style="?android:attr/progressBarStyleLarge"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="center"
             android:visibility="gone"
           />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Converting..."
+            android:textStyle="bold"
+            android:id="@+id/convertingText"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            android:singleLine="false"
+            android:textColor="#ffffff" />
 
 
     </FrameLayout>
@@ -57,6 +70,7 @@
             <ToggleButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/repeatToggleButton"
                 android:button="@drawable/ic_action_repeat"
                 android:textOn="On"
                 android:textOff="Off"
@@ -137,7 +151,7 @@
                 android:layout_height="match_parent"
                 android:text="0.000"
                 android:gravity="center_vertical"
-                android:id="@+id/textVieww"
+                android:id="@+id/textView2"
                 />
 
         </LinearLayout>

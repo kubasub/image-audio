@@ -26,6 +26,7 @@ import android.widget.SeekBar;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -59,15 +60,19 @@ public class MainActivity extends Activity {
     private Button playButton;
     private View progressBar;
     private SeekBar grainDurationSeekBar;
+    private SeekBar seekBar2Temp;
     private TextView progressText;
+    private TextView textView2;
+    private TextView convertingText;
+    private ToggleButton repeatToggleButton;
 
     private ProgressBar loadingSpinner;
 
     private float grainDuration;
     private float realGrainDuration;
 
-
     private boolean readyToPlay = false;
+    private boolean isPlaying = false;
 
 
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
@@ -91,8 +96,13 @@ public class MainActivity extends Activity {
         grainDurationSeekBar.setOnSeekBarChangeListener(new SeekBarHandler());
         grainDuration = 0.025f;
 
+        seekBar2Temp = (SeekBar) findViewById(R.id.seekBar2);
+        seekBar2Temp.setOnSeekBarChangeListener(new SeekBarHandler2());
+
 
         progressText = (TextView) findViewById(R.id.progressText);
+        textView2 = (TextView) findViewById(R.id.textView2);
+        convertingText = (TextView) findViewById(R.id.convertingText);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
         imgPreview.setImageBitmap(image);
@@ -102,9 +112,12 @@ public class MainActivity extends Activity {
 
         loadingSpinner = (ProgressBar) findViewById(R.id.progressSpinner);
 
+        repeatToggleButton = (ToggleButton) findViewById(R.id.repeatToggleButton);
+
 
         playButton.setText("Convert");
         loadingSpinner.setVisibility(View.GONE);
+        convertingText.setVisibility(View.GONE);
 
 
     }
@@ -265,6 +278,7 @@ public class MainActivity extends Activity {
 
     public boolean saveImageToExternalStorage(Bitmap image) {
         String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD;
+
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
 
         try {
@@ -457,10 +471,25 @@ public class MainActivity extends Activity {
 
     public boolean saveWav() throws FileNotFoundException {
 
+        if(readyToPlay){
+
+
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
 
         String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Imajadio/";
+
+
+        try {
+            File dir = new File(fullPath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+        } catch (Exception e) {
+            Log.e("saveWav()", e.getMessage());
+            return false;
+        }
+
         FileOutputStream all = new FileOutputStream(fullPath + "IMAJADIO_" + timeStamp + ".wav");
 
         //This creates the header for the wav file.
@@ -483,6 +512,9 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
         return true;
+        }
+        Toast.makeText(getApplicationContext(), "Audio NOT converted yet", Toast.LENGTH_SHORT).show();
+        return false;
     }//save
 
 
@@ -490,13 +522,17 @@ public class MainActivity extends Activity {
         @Override
         public void onClick(View view) {
 
+            Log.e("REPEAT BUTTON", String.valueOf(repeatToggleButton.isChecked()));
+
             if (readyToPlay == true) {
+
+
                 imajadio.play();
                 new Thread(new Runnable() {
 
                     @Override
                     public void run() {
-
+                        isPlaying = true;
                         onUpdateProgressBar(-1);
 
                         for (int i = 0; i < imgPreview.getWidth(); i++) {
@@ -512,7 +548,7 @@ public class MainActivity extends Activity {
                         }
                         onUpdateProgressBar(-1);
 
-
+                        isPlaying = true;
                     }
                 }).start();
             } else {
@@ -532,6 +568,28 @@ public class MainActivity extends Activity {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
             grainDuration = (float) ((progress + 1) * .001);
             progressText.setText(String.valueOf(grainDuration));
+
+            readyToPlay = false;
+            playButton.setText("Convert");
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    }
+
+    private class SeekBarHandler2 implements SeekBar.OnSeekBarChangeListener {
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+
+            textView2.setText(String.valueOf(progress));
 
             readyToPlay = false;
             playButton.setText("Convert");
@@ -575,10 +633,12 @@ public class MainActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-            realGrainDuration=grainDuration;
+            realGrainDuration = grainDuration;
             loadingSpinner.setVisibility(View.VISIBLE);
+            convertingText.setVisibility(View.VISIBLE);
             playButton.setEnabled(false);
             grainDurationSeekBar.setEnabled(false);
+            seekBar2Temp.setEnabled(false);
         }
 
         @Override
@@ -601,9 +661,11 @@ public class MainActivity extends Activity {
 
             playButton.setText("PLAY");
             loadingSpinner.setVisibility(View.GONE);
+            convertingText.setVisibility(View.GONE);
 
             playButton.setEnabled(true);
             grainDurationSeekBar.setEnabled(true);
+            seekBar2Temp.setEnabled(true);
         }
     }//AsyncTaskImajadio
 }
