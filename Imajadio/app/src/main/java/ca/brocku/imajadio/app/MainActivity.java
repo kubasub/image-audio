@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -57,6 +58,7 @@ public class MainActivity extends Activity {
     private Uri fileUri; // file url to store image
 
     private ImageView imgPreview;
+    private ImageView loadingBlack;
     private Button playButton;
     private View progressBar;
     private SeekBar grainDurationSeekBar;
@@ -64,7 +66,7 @@ public class MainActivity extends Activity {
     private TextView progressText;
     private TextView textView2;
     private TextView convertingText;
-    private ToggleButton repeatToggleButton;
+
 
     private ProgressBar loadingSpinner;
 
@@ -111,13 +113,17 @@ public class MainActivity extends Activity {
         playButton.setOnClickListener(new PlayButtonHandler());
 
         loadingSpinner = (ProgressBar) findViewById(R.id.progressSpinner);
+        loadingBlack = (ImageView)findViewById(R.id.loadingBlack);
 
-        repeatToggleButton = (ToggleButton) findViewById(R.id.repeatToggleButton);
+
 
 
         playButton.setText("Convert");
         loadingSpinner.setVisibility(View.GONE);
         convertingText.setVisibility(View.GONE);
+        loadingBlack.setAlpha(100);
+        loadingBlack.setVisibility(View.GONE);
+
 
 
     }
@@ -175,6 +181,7 @@ public class MainActivity extends Activity {
             imgPreview.setDrawingCacheEnabled(false);
             imgPreview.setDrawingCacheEnabled(true);
             image = imgPreview.getDrawingCache();
+           // image=((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
 
 
             Log.e("impreveiw height", String.valueOf(imgPreview.getHeight()));
@@ -387,6 +394,7 @@ public class MainActivity extends Activity {
             imgPreview.setDrawingCacheEnabled(false);
             imgPreview.setDrawingCacheEnabled(true);
             image = imgPreview.getDrawingCache();
+           //image = ((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
 
 
         } catch (NullPointerException e) {
@@ -522,7 +530,7 @@ public class MainActivity extends Activity {
         @Override
         public void onClick(View view) {
 
-            Log.e("REPEAT BUTTON", String.valueOf(repeatToggleButton.isChecked()));
+
 
             if (readyToPlay == true) {
 
@@ -567,7 +575,7 @@ public class MainActivity extends Activity {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
             grainDuration = (float) ((progress + 1) * .001);
-            progressText.setText(String.valueOf(grainDuration));
+            progressText.setText(String.valueOf((int)(grainDuration*1000))+" ms");
 
             readyToPlay = false;
             playButton.setText("Convert");
@@ -636,6 +644,7 @@ public class MainActivity extends Activity {
             realGrainDuration = grainDuration;
             loadingSpinner.setVisibility(View.VISIBLE);
             convertingText.setVisibility(View.VISIBLE);
+           loadingBlack.setVisibility(View.VISIBLE);
             playButton.setEnabled(false);
             grainDurationSeekBar.setEnabled(false);
             seekBar2Temp.setEnabled(false);
@@ -662,7 +671,7 @@ public class MainActivity extends Activity {
             playButton.setText("PLAY");
             loadingSpinner.setVisibility(View.GONE);
             convertingText.setVisibility(View.GONE);
-
+           loadingBlack.setVisibility(View.GONE);
             playButton.setEnabled(true);
             grainDurationSeekBar.setEnabled(true);
             seekBar2Temp.setEnabled(true);

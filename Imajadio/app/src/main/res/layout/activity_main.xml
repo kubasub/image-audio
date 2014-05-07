@@ -10,13 +10,25 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
+
+
         <ImageView
             android:id="@+id/imgPreview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible"
             android:layout_gravity="center_vertical|right"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+           />
+
+        <ImageView
+            android:id="@+id/loadingBlack"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            android:layout_gravity="center_vertical|right"
+            android:scaleType="centerCrop"
+            android:background="@drawable/convertingblock"/>
 
         <View
             android:id="@+id/progressBar"
@@ -61,37 +73,28 @@
             android:layout_height="56dp">
 
               <Button
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/playButton"
                 android:layout_centerHorizontal="true" />
 
 
-            <ToggleButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/repeatToggleButton"
-                android:button="@drawable/ic_action_repeat"
-                android:textOn="On"
-                android:textOff="Off"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true" />
 
         </RelativeLayout>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            >
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="Param1"
+                android:text="Column Duration"
                 android:gravity="center_vertical"
                 android:id="@+id/Param1Text"
-
-                android:layout_weight="1"/>
+                android:layout_weight="2.5"/>
 
 
             <SeekBar
@@ -100,19 +103,20 @@
                 android:id="@+id/seekBarGrainDuration"
                 android:progress="25"
                 android:max="49"
-                   android:progressDrawable="@drawable/styled_progress"
+                android:progressDrawable="@drawable/seekbarline"
                 android:indeterminate="false"
                 android:layout_weight="4"
-                />
+                android:maxHeight="2dp" />
 
             <TextView
-                android:layout_weight="0.75"
+                android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="0.025"
+                android:text="25 ms"
                 android:gravity="center_vertical"
                 android:id="@+id/progressText"
                 />
+
 
         </LinearLayout>
 
@@ -124,29 +128,25 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:text="Param2"
+                android:text="Param22222222"
                 android:gravity="center_vertical"
                 android:id="@+id/Param2Text"
 
-                android:layout_weight="1"/>
+                android:layout_weight="2.5"/>
 
             <SeekBar
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:id="@+id/seekBar2"
-                android:layout_above="@+id/seekBar"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
                 android:gravity="center_vertical"
-                android:progressDrawable="@drawable/styled_progress"
+                android:progressDrawable="@drawable/seekbarline"
                 android:indeterminate="false"
-                android:layout_weight="4"/>
+                android:layout_weight="4"
+                android:maxHeight="2dp"/>
 
 
             <TextView
-                android:layout_weight="0.75"
+                android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="0.000"
