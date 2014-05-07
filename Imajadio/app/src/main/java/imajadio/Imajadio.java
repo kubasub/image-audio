@@ -83,7 +83,7 @@ public class Imajadio {
             //Convert a column to samples
             int[] pixels = new int[IMAGE_HEIGHT];
             IMAGE.getPixels(pixels, 0, 1, column - 1, 0, 1, IMAGE_HEIGHT); //extract a column of pixels
-            Log.e("COLUMN #", String.valueOf(column));
+            //Log.e("COLUMN #", String.valueOf(column));
             samples = columnToSamples(pixels, column - 1);
 
             // convert to 16 bit pcm sound array
@@ -103,6 +103,7 @@ public class Imajadio {
     private double[] columnToSamples(int[] column, int columnIndex) {
         Harmonic[] harmonics = new Harmonic[column.length];
 
+        //converts each pixel in a column to its associated harmonic
         for (int verticalOffset = 0; verticalOffset < column.length; verticalOffset++) {
             harmonics[verticalOffset] = pixelToHarmonic(column[verticalOffset], verticalOffset);
             //Log.e("Harm #"+String.valueOf(verticalOffset), "freq: "+ String.valueOf(harmonics[verticalOffset].getFrequency()) + "; amp: " + String.valueOf(harmonics[verticalOffset].getAmplitude()));
@@ -120,9 +121,18 @@ public class Imajadio {
                 // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
                 //amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
                 amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) / (SAMPLE_RATE / h.getFrequency()));
+
+
+                //TESTING OUTPUT
+                if((columnIndex*numSamples)+sampleIndex >= 522 && (columnIndex*numSamples)+sampleIndex <= 1372 && h.getAmplitude() != 0) {
+                    Log.e("TEST", "Sample: " + String.valueOf((columnIndex*numSamples)+sampleIndex) + "\t Harmonic: " + String.valueOf(h.getFrequency()) + "\t Amplitude: " + String.valueOf(h.getAmplitude()));
+                }
+
+
             }
             samples[sampleIndex] = amplitude;
 
+            //highest amplitude is stored for later normalization
             if (Math.abs(samples[sampleIndex]) > highestAmplitude) {
                 highestAmplitude = Math.abs(samples[sampleIndex]);
             }

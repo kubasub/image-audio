@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
-        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.dots, options);
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.line_white, options);
 
         progressBar = (View) findViewById(R.id.progressBar);
 
@@ -649,7 +649,7 @@ public class MainActivity extends Activity {
 
             imajadio.bitmapToAudio();
 
-            imajadio.normalizeAudio();
+            //imajadio.normalizeAudio();
 
             readyToPlay = true;
 
