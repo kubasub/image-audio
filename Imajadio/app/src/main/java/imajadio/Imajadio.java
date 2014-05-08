@@ -125,7 +125,7 @@ public class Imajadio {
 
                 //TESTING OUTPUT
                 if((columnIndex*numSamples)+sampleIndex >= 522 && (columnIndex*numSamples)+sampleIndex <= 1372 && h.getAmplitude() != 0) {
-                    Log.e("TEST", "Sample: " + String.valueOf((columnIndex*numSamples)+sampleIndex) + "\t Harmonic: " + String.valueOf(h.getFrequency()) + "\t Amplitude: " + String.valueOf(h.getAmplitude()));
+                    //Log.e("TEST", "Sample: " + String.valueOf((columnIndex*numSamples)+sampleIndex) + "\t Harmonic: " + String.valueOf(h.getFrequency()) + "\t Amplitude: " + String.valueOf(h.getAmplitude()));
                 }
 
 
@@ -174,7 +174,23 @@ public class Imajadio {
         }
 
         audio.play();
+
+
     }
+
+    public void stop(){
+        audio.stop();
+        audio.reloadStaticData();
+    }
+
+
+    public void onPlaybackStopped(AudioTrack.OnPlaybackPositionUpdateListener listener){
+
+        audio.setNotificationMarkerPosition((int) (SAMPLE_RATE * IMAGE_WIDTH*grainDuration));
+        audio.setPlaybackPositionUpdateListener(listener);
+
+    }
+
 
     public byte[] getDATA() {
         return DATA;

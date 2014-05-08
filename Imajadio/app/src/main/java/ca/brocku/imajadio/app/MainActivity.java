@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.AudioTrack;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -76,6 +77,7 @@ public class MainActivity extends Activity {
     private boolean readyToPlay = false;
     private boolean isPlaying = false;
 
+    private AudioTrack.OnPlaybackPositionUpdateListener listener;
 
     public final static String APP_PATH_SD_CARD = "/Imajadio/"; //directory to store images
 
@@ -113,20 +115,34 @@ public class MainActivity extends Activity {
         playButton.setOnClickListener(new PlayButtonHandler());
 
         loadingSpinner = (ProgressBar) findViewById(R.id.progressSpinner);
-        loadingBlack = (ImageView)findViewById(R.id.loadingBlack);
+        loadingBlack = (ImageView) findViewById(R.id.loadingBlack);
 
 
-
-
-        playButton.setText("Convert");
+        playButton.setText("CONVERT");
         loadingSpinner.setVisibility(View.GONE);
         convertingText.setVisibility(View.GONE);
-        loadingBlack.setAlpha(100);
         loadingBlack.setVisibility(View.GONE);
 
+        listener = new AudioTrack.OnPlaybackPositionUpdateListener() {
+            @Override
+            public void onMarkerReached(AudioTrack audioTrack) {
+
+                playButton.setText("PLAY");
+                grainDurationSeekBar.setEnabled(true);
+                seekBar2Temp.setEnabled(true);
+
+            }
+
+            @Override
+            public void onPeriodicNotification(AudioTrack audioTrack) {
+
+            }
 
 
-    }
+        };
+
+
+    }//onCreate
 
     @Override
     protected void onResume() {
@@ -181,14 +197,14 @@ public class MainActivity extends Activity {
             imgPreview.setDrawingCacheEnabled(false);
             imgPreview.setDrawingCacheEnabled(true);
             image = imgPreview.getDrawingCache();
-           // image=((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
+            // image=((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
 
 
             Log.e("impreveiw height", String.valueOf(imgPreview.getHeight()));
             Log.e("impreveiw weight", String.valueOf(imgPreview.getWidth()));
 
             readyToPlay = false;
-            playButton.setText("Convert");
+            playButton.setText("CONVERT");
 
         }
     }//onActivityResult
@@ -394,7 +410,7 @@ public class MainActivity extends Activity {
             imgPreview.setDrawingCacheEnabled(false);
             imgPreview.setDrawingCacheEnabled(true);
             image = imgPreview.getDrawingCache();
-           //image = ((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
+            //image = ((BitmapDrawable)imgPreview.getDrawable()).getBitmap();
 
 
         } catch (NullPointerException e) {
@@ -479,91 +495,89 @@ public class MainActivity extends Activity {
 
     public boolean saveWav() throws FileNotFoundException {
 
-        if(readyToPlay){
+        if (readyToPlay) {
 
 
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
-                Locale.getDefault()).format(new Date());
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
+                    Locale.getDefault()).format(new Date());
 
-        String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Imajadio/";
+            String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Imajadio/";
 
 
-        try {
-            File dir = new File(fullPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
+            try {
+                File dir = new File(fullPath);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+            } catch (Exception e) {
+                Log.e("saveWav()", e.getMessage());
+                return false;
             }
-        } catch (Exception e) {
-            Log.e("saveWav()", e.getMessage());
-            return false;
-        }
 
-        FileOutputStream all = new FileOutputStream(fullPath + "IMAJADIO_" + timeStamp + ".wav");
+            FileOutputStream all = new FileOutputStream(fullPath + "IMAJADIO_" + timeStamp + ".wav");
 
-        //This creates the header for the wav file.
-        WaveHeader w = new WaveHeader((short) 1, imajadio.getAudioChannelCount(), imajadio.getAudioSampleRate(), (short) 16, imajadio.getDATA().length);
+            //This creates the header for the wav file.
+            WaveHeader w = new WaveHeader((short) 1, imajadio.getAudioChannelCount(), imajadio.getAudioSampleRate(), (short) 16, imajadio.getDATA().length);
 
-        Log.e("HEADERINFO", w.toString());
+            Log.e("HEADERINFO", w.toString());
 
-        try {
-            //write header
-            w.write(all);
+            try {
+                //write header
+                w.write(all);
 
-            //write the data
-            all.write(imajadio.getDATA());
+                //write the data
+                all.write(imajadio.getDATA());
 
-            all.close();
+                all.close();
 
-            Toast.makeText(getApplicationContext(), "Saved audio to Imajadio folder", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Saved audio to Imajadio folder", Toast.LENGTH_SHORT).show();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
         }
         Toast.makeText(getApplicationContext(), "Audio NOT converted yet", Toast.LENGTH_SHORT).show();
         return false;
     }//save
 
 
+    StatusBarThread t;
+
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
         public void onClick(View view) {
 
+            Button b = (Button) view;
+
+            String buttonText = b.getText().toString();
+
+            if (buttonText.equals("PLAY")) {
 
 
-            if (readyToPlay == true) {
+                if (readyToPlay == true) {
 
 
-                imajadio.play();
-                new Thread(new Runnable() {
+                    imajadio.play();
 
-                    @Override
-                    public void run() {
-                        isPlaying = true;
-                        onUpdateProgressBar(-1);
+                    playButton.setText("STOP");
+                    grainDurationSeekBar.setEnabled(false);
+                    seekBar2Temp.setEnabled(false);
 
-                        for (int i = 0; i < imgPreview.getWidth(); i++) {
-
-                            try {
-                                onUpdateProgressBar(i);
-                                Thread.sleep((long) (realGrainDuration * 1000));
+                    t = new StatusBarThread(isPlaying, MainActivity.this, imgPreview, realGrainDuration);
+                    t.start();
 
 
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        onUpdateProgressBar(-1);
-
-                        isPlaying = true;
-                    }
-                }).start();
-            } else {
-
-
+                }
+            } else if (buttonText.equals("CONVERT")) {
                 new AsyncTaskImajadio().execute();
+            } else if (buttonText.equals("STOP")) {
 
+                t.requestStop();
+                imajadio.stop();
+                playButton.setText("PLAY");
+                grainDurationSeekBar.setEnabled(true);
+                seekBar2Temp.setEnabled(true);
             }
 
         }
@@ -575,10 +589,10 @@ public class MainActivity extends Activity {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
             grainDuration = (float) ((progress + 1) * .001);
-            progressText.setText(String.valueOf((int)(grainDuration*1000))+" ms");
+            progressText.setText(String.valueOf((int) (grainDuration * 1000)) + " ms");
 
             readyToPlay = false;
-            playButton.setText("Convert");
+            playButton.setText("CONVERT");
         }
 
         @Override
@@ -600,7 +614,7 @@ public class MainActivity extends Activity {
             textView2.setText(String.valueOf(progress));
 
             readyToPlay = false;
-            playButton.setText("Convert");
+            playButton.setText("CONVERT");
         }
 
         @Override
@@ -644,7 +658,7 @@ public class MainActivity extends Activity {
             realGrainDuration = grainDuration;
             loadingSpinner.setVisibility(View.VISIBLE);
             convertingText.setVisibility(View.VISIBLE);
-           loadingBlack.setVisibility(View.VISIBLE);
+            loadingBlack.setVisibility(View.VISIBLE);
             playButton.setEnabled(false);
             grainDurationSeekBar.setEnabled(false);
             seekBar2Temp.setEnabled(false);
@@ -656,9 +670,13 @@ public class MainActivity extends Activity {
             imajadio = new Imajadio(image, 16, grainDuration);
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
+
             imajadio.bitmapToAudio();
 
+            imajadio.onPlaybackStopped(listener);
+
             //imajadio.normalizeAudio();
+
 
             readyToPlay = true;
 
@@ -671,10 +689,12 @@ public class MainActivity extends Activity {
             playButton.setText("PLAY");
             loadingSpinner.setVisibility(View.GONE);
             convertingText.setVisibility(View.GONE);
-           loadingBlack.setVisibility(View.GONE);
+            loadingBlack.setVisibility(View.GONE);
             playButton.setEnabled(true);
             grainDurationSeekBar.setEnabled(true);
             seekBar2Temp.setEnabled(true);
         }
     }//AsyncTaskImajadio
+
+
 }
