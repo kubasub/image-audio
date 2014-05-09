@@ -116,30 +116,29 @@ public class Imajadio {
         for (int sampleIndex = 0; sampleIndex < numSamples; sampleIndex++) { //for each sample in the output table
             amplitude = 0;
 
+            int skipper = 0;
             for (Harmonic h : harmonics) { //add the amplitude of each harmonic
-                if(h.getAmplitude() != 0) {
+                if(skipper%20 == 0) {
+                    if(h.getAmplitude() != 0) {
 
-                    double samplesPerPeriod = SAMPLE_RATE/h.getFrequency();
+                        double samplesPerPeriod = SAMPLE_RATE/h.getFrequency();
 
-                    // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
-                    //amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
-                    //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) / (SAMPLE_RATE / h.getFrequency()));
-                    //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) / (SAMPLE_RATE / h.getFrequency()));
-                    //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) * h.getFrequency());
-                    //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*(columnIndex-1)+sampleIndex)%samplesPerPeriod)/samplesPerPeriod);
-                    //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * (numSamples*(columnIndex-1)+sampleIndex)/samplesPerPeriod);
-                    amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex/samplesPerPeriod);
+                        // the "(numSamples*(columnIndex-1)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
+
+                        amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * (numSamples*(columnIndex-1)+sampleIndex)/samplesPerPeriod);
+                        //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex/samplesPerPeriod);
 
 
-                    //TESTING OUTPUT
-                    //if((columnIndex*numSamples)+sampleIndex >= 522 && (columnIndex*numSamples)+sampleIndex <= 1372 && h.getAmplitude() != 0) {
+                        //TESTING OUTPUT
+                        //if((columnIndex*numSamples)+sampleIndex >= 522 && (columnIndex*numSamples)+sampleIndex <= 1372 && h.getAmplitude() != 0) {
 //                if(h.getAmplitude() != 0) {
 //                    Log.e("TEST", "Sample: " + String.valueOf((columnIndex*numSamples)+sampleIndex) + "\t Harmonic: " + String.valueOf(h.getFrequency()) + "\t Amplitude: " + String.valueOf(h.getAmplitude()));
 //                }
-                    //}
+                        //}
 
+                    }
                 }
-
+                skipper++;
             }
             samples[sampleIndex] = amplitude;
 
