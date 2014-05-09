@@ -1,11 +1,8 @@
 package ca.brocku.imajadio.app;
 
-import android.app.Activity;
 import android.widget.ImageView;
 
-/**
- * Created by Steven2 on 5/7/14.
- */
+
 public class StatusBarThread extends Thread {
 
     public boolean shouldContinue = true;
