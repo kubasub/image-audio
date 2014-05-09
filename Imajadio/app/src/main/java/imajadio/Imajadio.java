@@ -83,7 +83,7 @@ public class Imajadio {
             //Convert a column to samples
             int[] pixels = new int[IMAGE_HEIGHT];
             IMAGE.getPixels(pixels, 0, 1, column - 1, 0, 1, IMAGE_HEIGHT); //extract a column of pixels
-            //Log.e("COLUMN #", String.valueOf(column));
+            Log.e("COLUMN #", String.valueOf(column));
             samples = columnToSamples(pixels, column - 1);
 
             // convert to 16 bit pcm sound array
@@ -117,16 +117,24 @@ public class Imajadio {
             amplitude = 0;
 
             for (Harmonic h : harmonics) { //add the amplitude of each harmonic
+                double samplesPerPeriod = SAMPLE_RATE/h.getFrequency();
 
                 // the "((numSamples*columnIndex)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
                 //amplitude += h.getAmplitude() * Math.sin(w * h.getFrequency() * ((numSamples * columnIndex) + sampleIndex));
-                amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) / (SAMPLE_RATE / h.getFrequency()));
+                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) / (SAMPLE_RATE / h.getFrequency()));
+                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) / (SAMPLE_RATE / h.getFrequency()));
+                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples * columnIndex) + sampleIndex) * h.getFrequency());
+                //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * ((numSamples*(columnIndex-1)+sampleIndex)%samplesPerPeriod)/samplesPerPeriod);
+                /////amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * (numSamples*(columnIndex-1)+sampleIndex)/samplesPerPeriod);
+                amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex/samplesPerPeriod);
 
 
                 //TESTING OUTPUT
-                if((columnIndex*numSamples)+sampleIndex >= 522 && (columnIndex*numSamples)+sampleIndex <= 1372 && h.getAmplitude() != 0) {
-                    Log.e("TEST", "Sample: " + String.valueOf((columnIndex*numSamples)+sampleIndex) + "\t Harmonic: " + String.valueOf(h.getFrequency()) + "\t Amplitude: " + String.valueOf(h.getAmplitude()));
-                }
+                //if((columnIndex*numSamples)+sampleIndex >= 522 && (columnIndex*numSamples)+sampleIndex <= 1372 && h.getAmplitude() != 0) {
+//                if(h.getAmplitude() != 0) {
+//                    Log.e("TEST", "Sample: " + String.valueOf((columnIndex*numSamples)+sampleIndex) + "\t Harmonic: " + String.valueOf(h.getFrequency()) + "\t Amplitude: " + String.valueOf(h.getAmplitude()));
+//                }
+                //}
 
 
             }

@@ -90,7 +90,7 @@ public class MainActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
-        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.line_white, options);
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.dual_line, options);
 
         progressBar = (View) findViewById(R.id.progressBar);
 
