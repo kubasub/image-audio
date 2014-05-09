@@ -90,7 +90,7 @@ public class MainActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inDensity = getResources().getDisplayMetrics().densityDpi;
-        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.dual_line, options);
+        image = BitmapFactory.decodeResource(this.getResources(), R.drawable.line_white_2bmp, options);
 
         progressBar = (View) findViewById(R.id.progressBar);
 
@@ -159,7 +159,7 @@ public class MainActivity extends Activity {
                 boolean deleted = file.delete();
 
                 readyToPlay = false;
-                playButton.setText("Convert");
+                playButton.setText("CONVERT");
 
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
