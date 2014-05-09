@@ -247,7 +247,7 @@ public class MainActivity extends Activity {
 
         switch (id) {
 
-           
+
 
             case R.id.action_exportAudio:
 
