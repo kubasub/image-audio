@@ -100,12 +100,11 @@ public class MainActivity extends Activity {
         grainDurationSeekBar.setOnSeekBarChangeListener(new SeekBarHandler());
         grainDuration = 0.025f;
 
-        seekBar2Temp = (SeekBar) findViewById(R.id.seekBar2);
-        seekBar2Temp.setOnSeekBarChangeListener(new SeekBarHandler2());
+
 
 
         progressText = (TextView) findViewById(R.id.progressText);
-        textView2 = (TextView) findViewById(R.id.textView2);
+
         convertingText = (TextView) findViewById(R.id.convertingText);
 
         imgPreview = (ImageView) findViewById(R.id.imgPreview);
@@ -252,8 +251,7 @@ public class MainActivity extends Activity {
 
         switch (id) {
 
-            case R.id.action_settings:
-                return true;
+           
 
             case R.id.action_exportAudio:
 
@@ -606,27 +604,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    private class SeekBarHandler2 implements SeekBar.OnSeekBarChangeListener {
-
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-
-            textView2.setText(String.valueOf(progress));
-
-            readyToPlay = false;
-            playButton.setText("CONVERT");
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-
-        }
-    }
 
     Handler handie = new Handler() {
         @Override
