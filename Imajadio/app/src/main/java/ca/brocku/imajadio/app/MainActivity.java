@@ -2,12 +2,10 @@ package ca.brocku.imajadio.app;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.AudioTrack;
 import android.media.ExifInterface;
 import android.net.Uri;
@@ -25,10 +23,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,8 +41,6 @@ import imajadio.Imajadio;
 import imajadio.WaveHeader;
 
 public class MainActivity extends Activity {
-
-    private ShareActionProvider mShareActionProvider;
 
     Imajadio imajadio;
 
@@ -81,6 +75,21 @@ public class MainActivity extends Activity {
 
     private Bitmap image; //the image to be converted
 
+    private StatusBarThread t;
+    private Handler handie = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Bundle b = msg.getData();
+            int position = b.getInt("PROGRESS_POSITION");
+
+            if (position == -1) {
+                progressBar.setVisibility(progressBar.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+            } else {
+                progressBar.setX(position);
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,9 +106,6 @@ public class MainActivity extends Activity {
         grainDurationSeekBar = (SeekBar) findViewById(R.id.seekBarGrainDuration);
         grainDurationSeekBar.setOnSeekBarChangeListener(new SeekBarHandler());
         grainDuration = 0.025f;
-
-
-
 
         progressText = (TextView) findViewById(R.id.progressText);
 
@@ -129,20 +135,11 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onPeriodicNotification(AudioTrack audioTrack) {
-
-            }
-
-
+            public void onPeriodicNotification(AudioTrack audioTrack) {}
         };
 
 
-    }//onCreate
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }//onResume
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -212,13 +209,12 @@ public class MainActivity extends Activity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        // save file url in bundle as it will be null on screen orientation
-        // changes
+        // save file url in bundle as it will be null on screen orientation changes
         outState.putParcelable("file_uri", fileUri);
-    }//onSaveInstanceState
+    }
 
-    /*
-     * Here we restore the fileUri again
+    /**
+     * Restore the fileUri again
      */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -226,7 +222,7 @@ public class MainActivity extends Activity {
 
         // get the file url
         fileUri = savedInstanceState.getParcelable("file_uri");
-    }//onRestoreInstanceState
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -235,7 +231,7 @@ public class MainActivity extends Activity {
         getMenuInflater().inflate(R.menu.main, menu);
 
         return true;
-    }//onCreateOptionsMenu
+    }
 
 
     @Override
@@ -246,17 +242,12 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
 
         switch (id) {
-
-
-
             case R.id.action_exportAudio:
-
                 try {
                     saveWav();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-
                 return true;
 
             case R.id.action_newImage:
@@ -265,8 +256,7 @@ public class MainActivity extends Activity {
 
             case R.id.action_loadImage:
                 //load image from sdcard
-                Intent i = new Intent(
-                        Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(i, RESULT_LOAD_IMAGE);
                 return true;
 
@@ -277,8 +267,8 @@ public class MainActivity extends Activity {
                 Bitmap bitmap = imgPreview.getDrawingCache();
                 saveImageToExternalStorage(bitmap);
                 deleteLastFromDCIM();
-
                 return true;
+
             case R.id.action_exit:
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_HOME);
@@ -287,11 +277,8 @@ public class MainActivity extends Activity {
                 return true;
 
         }
-
         return super.onOptionsItemSelected(item);
-
     }//onOptionsItemSelected
-
 
     public boolean saveImageToExternalStorage(Bitmap image) {
         String fullPath = Environment.getExternalStorageDirectory().getAbsolutePath() + APP_PATH_SD_CARD;
@@ -329,20 +316,7 @@ public class MainActivity extends Activity {
     }//saveImageToExternalStorage
 
 
-    ////////START CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Checking device has camera hardware or not
-     */
-    private boolean isDeviceSupportCamera() {
-        if (getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
-    }//isDeviceSupportCamera
+    //Start Camera Helper Methods
 
     /*
     * Capturing Camera Image will launch camera app request image capture
@@ -356,7 +330,7 @@ public class MainActivity extends Activity {
 
         // start the image capture Intent
         startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
-    }//captureImage
+    }
 
     /**
      * Receiving activity result method will be called after closing the camera
@@ -412,7 +386,7 @@ public class MainActivity extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }//previewCapturedImage
+    }
 
     /**
      * Creating file uri to store image/video
@@ -453,8 +427,9 @@ public class MainActivity extends Activity {
 
 
         return mediaFile;
-    }//getOutputMediaFile
-    ////////END CAMERA HELPER METHODS///////////////////////////////////////////////////////////////////////////////
+    }
+
+    //End Camera Helper Methods
 
 
     private void deleteLastFromDCIM() {
@@ -535,8 +510,13 @@ public class MainActivity extends Activity {
         return false;
     }//save
 
-
-    StatusBarThread t;
+    public void onUpdateProgressBar(int i) {
+        Message message = new Message();
+        Bundle b = new Bundle();
+        b.putInt("PROGRESS_POSITION", i);
+        message.setData(b);
+        handie.sendMessage(message);
+    }
 
     private class PlayButtonHandler implements View.OnClickListener {
         @Override
@@ -598,30 +578,6 @@ public class MainActivity extends Activity {
         }
     }
 
-
-    Handler handie = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Bundle b = msg.getData();
-            int position = b.getInt("PROGRESS_POSITION");
-
-            if (position == -1) {
-                progressBar.setVisibility(progressBar.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
-            } else {
-                progressBar.setX(position);
-            }
-        }
-    };
-
-    public void onUpdateProgressBar(int i) {
-        Message message = new Message();
-        Bundle b = new Bundle();
-        b.putInt("PROGRESS_POSITION", i);
-        message.setData(b);
-        handie.sendMessage(message);
-    }
-
-
     private class AsyncTaskImajadio extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -640,11 +596,8 @@ public class MainActivity extends Activity {
             imajadio = new Imajadio(image, 16, grainDuration);
             Log.e("IMAGE DIMENS (H/W)", image.getHeight() + "; " + image.getWidth());
 
-
             imajadio.bitmapToAudio();
-
             imajadio.onPlaybackStopped(listener);
-
             imajadio.normalizeAudio();
 
 

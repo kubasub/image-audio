@@ -5,18 +5,8 @@ import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.os.Environment;
 import android.util.Log;
 
-import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-/**
- * @author Jakub Subczynski
- * @date April 12, 2014
- */
 public class Imajadio {
     private final int NUMBER_OF_FREQUENCIES = 4000 - 100; //frequency range from 100-10000 Hz
     private final int SAMPLE_RATE = 8000;
@@ -28,9 +18,7 @@ public class Imajadio {
 
     private byte[] DATA;
     private double highestAmplitude;
-
     private double grainDuration;
-
     private AudioTrack audio; //contains the audio to play
 
 
@@ -43,7 +31,6 @@ public class Imajadio {
     }
 
     public Imajadio(Bitmap image, int bitDepth, double grainDuration) {
-
         this.IMAGE = image;
         this.IMAGE_HEIGHT = IMAGE.getHeight();
         this.IMAGE_WIDTH = IMAGE.getWidth();
@@ -63,7 +50,7 @@ public class Imajadio {
 
     /**
      * Converts the entire bitmap image to audio.
-     * <p/>
+     *
      * It writes out the samples to the AudioTrack so that the returned AudioTrack just needs to be
      * played.
      *
@@ -118,25 +105,12 @@ public class Imajadio {
 
             int skipper = 0;
             for (Harmonic h : harmonics) { //add the amplitude of each harmonic
-                if(skipper%20 == 0) {
-                    if(h.getAmplitude() != 0) {
+                if(skipper%20 == 0 && h.getAmplitude() != 0) {
 
-                        double samplesPerPeriod = SAMPLE_RATE/h.getFrequency();
+                    double samplesPerPeriod = SAMPLE_RATE/h.getFrequency();
+                    amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * (numSamples*(columnIndex-1)+sampleIndex)/samplesPerPeriod);
+                    //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex/samplesPerPeriod);
 
-                        // the "(numSamples*(columnIndex-1)+sampleIndex)" is used to make each frequency continue off from where it was in the last column
-
-                        amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * (numSamples*(columnIndex-1)+sampleIndex)/samplesPerPeriod);
-                        //amplitude += h.getAmplitude() * Math.sin(2 * Math.PI * sampleIndex/samplesPerPeriod);
-
-
-                        //TESTING OUTPUT
-                        //if((columnIndex*numSamples)+sampleIndex >= 522 && (columnIndex*numSamples)+sampleIndex <= 1372 && h.getAmplitude() != 0) {
-//                if(h.getAmplitude() != 0) {
-//                    Log.e("TEST", "Sample: " + String.valueOf((columnIndex*numSamples)+sampleIndex) + "\t Harmonic: " + String.valueOf(h.getFrequency()) + "\t Amplitude: " + String.valueOf(h.getAmplitude()));
-//                }
-                        //}
-
-                    }
                 }
                 skipper++;
             }
@@ -148,7 +122,6 @@ public class Imajadio {
             }
 
         }
-
 
         return samples;
     }
@@ -177,15 +150,11 @@ public class Imajadio {
     }
 
     public void play() {
-
         if (audio.getPlayState() == 3) {
             audio.stop();
             audio.reloadStaticData();
         }
-
         audio.play();
-
-
     }
 
     public void stop(){
@@ -193,14 +162,11 @@ public class Imajadio {
         audio.reloadStaticData();
     }
 
-
     public void onPlaybackStopped(AudioTrack.OnPlaybackPositionUpdateListener listener){
-
         audio.setNotificationMarkerPosition((int) (SAMPLE_RATE * IMAGE_WIDTH*grainDuration));
         audio.setPlaybackPositionUpdateListener(listener);
 
     }
-
 
     public byte[] getDATA() {
         return DATA;
@@ -222,21 +188,14 @@ public class Imajadio {
 
             int k = (int) ((twoBytesToAmplitude(DATA[i], DATA[i + 1])) * multiplier);
 
-            // Log.e("iiiii...", String.valueOf(i));
-            // Log.e("First...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
-
             DATA[i] = (byte) (k & 0x00ff);
             DATA[i + 1] = (byte) ((k & 0xff00) >>> 8);
-
-            // Log.e("After...", String.valueOf(twoBytesToAmplitude(DATA[i],DATA[i+1])));
         }
-        //audio.write(DATA, 0, DATA.length);
+        audio.write(DATA, 0, DATA.length);
 
     }//normalizeAudio
 
     private static double twoBytesToAmplitude(byte b1, byte b2) {
         return ((b2 << 8) | (b1 & 0xFF));
     }
-
-
-}//Imajadio
+}
