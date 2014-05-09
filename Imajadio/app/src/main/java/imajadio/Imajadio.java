@@ -137,6 +137,7 @@ public class Imajadio {
                 //}
 
 
+
             }
             samples[sampleIndex] = amplitude;
 
@@ -182,7 +183,23 @@ public class Imajadio {
         }
 
         audio.play();
+
+
     }
+
+    public void stop(){
+        audio.stop();
+        audio.reloadStaticData();
+    }
+
+
+    public void onPlaybackStopped(AudioTrack.OnPlaybackPositionUpdateListener listener){
+
+        audio.setNotificationMarkerPosition((int) (SAMPLE_RATE * IMAGE_WIDTH*grainDuration));
+        audio.setPlaybackPositionUpdateListener(listener);
+
+    }
+
 
     public byte[] getDATA() {
         return DATA;
